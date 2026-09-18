@@ -34,21 +34,53 @@ fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 const app = express();
 
 // Deployment-aware CORS
-const allowedOrigins = process.env.FRONTEND_URL
-  ? process.env.FRONTEND_URL.split(",").map(s => s.trim())
-  : ["http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173"];
+const configuredOrigins = (process.env.FRONTEND_URL || "")
+  .split(",")
+  .map(s => s.trim().replace(/\/+$/, ""))
+  .filter(Boolean);
+
+const defaultOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://127.0.0.1:5173",
+  "http://localhost:8000"
+];
+
+const allowedOrigins = Array.from(new Set([...configuredOrigins, ...defaultOrigins]));
 
 app.use(cors({
   origin: (origin, callback) => {
+    // Allow non-browser requests (mobile apps, Postman, curl, server-to-server)
     if (!origin) return callback(null, true);
-    if (process.env.NODE_ENV !== "production") return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes("*")) {
+
+    const cleanOrigin = origin.replace(/\/+$/, "").toLowerCase();
+
+    // Check exact matches or wildcard
+    const isExplicitlyAllowed = allowedOrigins.some(allowed => {
+      if (allowed === "*") return true;
+      return allowed.toLowerCase() === cleanOrigin;
+    });
+
+    // Also automatically permit *.netlify.app, *.onrender.com, *.vercel.app, and localhost
+    const isTrustedHost =
+      cleanOrigin.endsWith(".netlify.app") ||
+      cleanOrigin.endsWith(".onrender.com") ||
+      cleanOrigin.endsWith(".vercel.app") ||
+      cleanOrigin.includes("localhost") ||
+      cleanOrigin.includes("127.0.0.1");
+
+    if (isExplicitlyAllowed || isTrustedHost || process.env.NODE_ENV !== "production") {
       return callback(null, true);
     }
-    return callback(new Error("CORS policy violation: Origin not allowed"), false);
+
+    return callback(new Error(`CORS policy violation: Origin ${origin} not allowed`), false);
   },
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
 }));
+
+app.options("*", cors());
 app.use(express.json());
 app.use("/uploads", express.static(UPLOAD_DIR));
 
