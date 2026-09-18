@@ -1,0 +1,54 @@
+version: "3.9"
+
+# ==============================================================================
+# MediKiosk / Dhanvantari — Public Demo Docker Compose
+# Runs the API & MongoDB without requiring local PaddleOCR or local Ollama.
+# Usage: docker compose -f docker-compose.demo.yml up -d
+# ==============================================================================
+
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo_demo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 8000
+      MONGO_URI: mongodb://mongo:27017/medikiosk
+      # Disable local-only dependencies for public demo
+      OCR_ENABLED: "false"
+      AI_ENABLED: "false"
+      DEMO_MODE: ${DEMO_MODE:-true}
+      JWT_SECRET: ${JWT_SECRET:-medikiosk-demo-secure-jwt-key-2025}
+      PUBLIC_APP_URL: ${PUBLIC_APP_URL:-}
+      FRONTEND_URL: ${FRONTEND_URL:-}
+      SARVAM_API_KEY: ${SARVAM_API_KEY:-}
+      BHASINI_INFERENCE_KEY: ${BHASINI_INFERENCE_KEY:-}
+      BHASINI_UDYAT_KEY: ${BHASINI_UDYAT_KEY:-}
+      BHASINI_USER_ID: ${BHASINI_USER_ID:-}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+      TWILIO_VERIFY_SID: ${TWILIO_VERIFY_SID:-}
+    ports:
+      - "8000:8000"
+    volumes:
+      - uploads_demo_data:/app/uploads
+
+volumes:
+  mongo_demo_data:
+  uploads_demo_data:

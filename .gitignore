@@ -1,0 +1,61 @@
+# Environment Variables
+.env
+.env.*
+*.env
+**/.env
+**/.env.*
+backend/.env
+frontend/.env
+mock-abha-server/.env
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+
+# Production / Build Output
+dist/
+dist-ssr/
+build/
+frontend/dist/
+
+# SQLite Database files (legacy / fallback)
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+backend/medikiosk.db*
+
+# Uploads & temporary media
+uploads/
+backend/uploads/*
+/audio_cache/
+!frontend/public/audio_cache/
+mongo_data/
+mongo_demo_data/
+uploads_data/
+uploads_demo_data/
+
+# OCR traineddata files
+*.traineddata
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Editor & OS files
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
