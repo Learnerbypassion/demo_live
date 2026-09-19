@@ -8,6 +8,7 @@ import {
   Building2, 
   Users, 
   UserCircle, 
+  Stethoscope,
   ArrowRight, 
   ExternalLink,
   ShieldCheck,
@@ -18,9 +19,9 @@ import {
 
 export const DEMO_CREDENTIALS = [
   {
-    id: 'admin_doctor',
-    roleTitle: 'Hospital Admin / Doctor',
-    badge: 'Staff Portal',
+    id: 'admin',
+    roleTitle: 'Hospital Admin',
+    badge: 'Admin Portal',
     badgeColor: 'bg-blue-100 text-blue-800 border-blue-200',
     icon: Building2,
     targetUrl: '/hospital-login',
@@ -29,12 +30,26 @@ export const DEMO_CREDENTIALS = [
       { label: 'Email', value: 't@t.com' },
       { label: 'Password', value: '1234567890' },
     ],
-    note: 'Use under Admin or Doctor login tabs',
+    note: 'Use under Admin tab in Physician & Staff Portal',
+  },
+  {
+    id: 'doctor',
+    roleTitle: 'Doctor',
+    badge: 'Clinical Staff',
+    badgeColor: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+    icon: Stethoscope,
+    targetUrl: '/hospital-login',
+    tab: 'doctor',
+    fields: [
+      { label: 'Mobile / Email', value: '7602991068' },
+      { label: 'Password', value: '1234567890' },
+    ],
+    note: 'Use under Doctor tab in Physician & Staff Portal',
   },
   {
     id: 'receptionist',
     roleTitle: 'Receptionist Desk',
-    badge: 'Staff Portal',
+    badge: 'Front Desk',
     badgeColor: 'bg-amber-100 text-amber-800 border-amber-200',
     icon: Users,
     targetUrl: '/hospital-login',
@@ -43,21 +58,21 @@ export const DEMO_CREDENTIALS = [
       { label: 'Email', value: 'r@r.com' },
       { label: 'Password', value: 'Reception@123' },
     ],
-    note: 'Use under Receptionist login tab',
+    note: 'Use under Receptionist tab in Physician & Staff Portal',
   },
   {
     id: 'patient',
-    roleTitle: 'Patient Portal & MediKiosk',
-    badge: 'Patient Portal',
+    roleTitle: 'Patient Portal',
+    badge: 'OTP Login',
     badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-200',
     icon: UserCircle,
     targetUrl: '/patient-login',
     tab: 'patient',
     fields: [
-      { label: 'Phone', value: '7602991068' },
-      { label: 'Pass / OTP', value: '1234567890' },
+      { label: 'Mobile', value: 'Any 10-digit number' },
+      { label: 'Demo OTP', value: '123456 (Only)' },
     ],
-    note: 'Use on Patient Login or Kiosk. Demo OTP: 123456 or 1234567890',
+    note: 'Patient login is done by OTP: 123456 only',
   },
 ];
 
@@ -74,7 +89,7 @@ export default function JudgeCredentials({ variant = 'card', onFill, currentTab 
     }, 2000);
   };
 
-  // 1. Compact Variant (For HospitalLogin / PatientLogin pages)
+  // 1. Compact Variant
   if (variant === 'compact') {
     return (
       <div className="w-full bg-gradient-to-br from-slate-900 to-brand-950 text-white rounded-xl p-4 shadow-lg border border-slate-700/60 mt-6">
@@ -123,7 +138,7 @@ export default function JudgeCredentials({ variant = 'card', onFill, currentTab 
                     {onFill && (
                       <button
                         type="button"
-                        onClick={() => onFill(cred)}
+                        onClick={() => onFill(cred.tab)}
                         className="text-[11px] font-medium bg-brand-600 hover:bg-brand-500 text-white px-2 py-0.5 rounded transition-colors shadow-sm"
                       >
                         Quick Fill
@@ -165,7 +180,7 @@ export default function JudgeCredentials({ variant = 'card', onFill, currentTab 
     );
   }
 
-  // 2. Full Card Variant (For PortalSelection.jsx Landing Page)
+  // 2. Full Card Variant
   return (
     <motion.div
       initial={{ opacity: 0, y: 15 }}
@@ -173,7 +188,6 @@ export default function JudgeCredentials({ variant = 'card', onFill, currentTab 
       transition={{ duration: 0.5, delay: 0.4 }}
       className="mt-10 sm:mt-12 max-w-5xl mx-auto w-full bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden"
     >
-      {/* Banner Header */}
       <div className="bg-gradient-to-r from-slate-900 via-brand-950 to-slate-900 px-5 py-4 sm:px-6 sm:py-4.5 text-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-300/30 flex items-center justify-center shrink-0">
@@ -195,8 +209,7 @@ export default function JudgeCredentials({ variant = 'card', onFill, currentTab 
         </div>
       </div>
 
-      {/* Cards Grid */}
-      <div className="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50/60">
+      <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 bg-slate-50/60">
         {DEMO_CREDENTIALS.map((cred) => {
           const Icon = cred.icon;
           return (
@@ -205,7 +218,6 @@ export default function JudgeCredentials({ variant = 'card', onFill, currentTab 
               className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex flex-col justify-between hover:shadow-md hover:border-brand-300 transition-all"
             >
               <div>
-                {/* Card Top */}
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-2">
                     <div className="p-2 rounded-lg bg-slate-100 text-slate-700">
@@ -220,7 +232,6 @@ export default function JudgeCredentials({ variant = 'card', onFill, currentTab 
                   </div>
                 </div>
 
-                {/* Fields with Copy Buttons */}
                 <div className="space-y-2 mt-3">
                   {cred.fields.map((f) => {
                     const copyId = `card-${cred.id}-${f.label}`;
@@ -265,7 +276,6 @@ export default function JudgeCredentials({ variant = 'card', onFill, currentTab 
                 )}
               </div>
 
-              {/* Action Button */}
               <button
                 type="button"
                 onClick={() => navigate(cred.targetUrl)}
@@ -281,7 +291,205 @@ export default function JudgeCredentials({ variant = 'card', onFill, currentTab 
   );
 }
 
-// 3. Floating Quick-Access Drawer Widget (Global Floating Pill in App.jsx)
+// 3. Side Box with Dotted Border (for side placement next to Login Card)
+export function DemoCredentialsSideBox({ onAutoFill, currentTab }) {
+  const [copiedKey, setCopiedKey] = useState(null);
+
+  const handleCopy = (text, key) => {
+    navigator.clipboard.writeText(text);
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(null), 2000);
+  };
+
+  return (
+    <div className="w-full max-w-sm bg-white/95 backdrop-blur-sm border-2 border-dotted border-slate-400 hover:border-slate-500 rounded-2xl p-5 sm:p-6 shadow-sm transition-all">
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-1">
+        <div className="p-1.5 bg-amber-100 text-amber-800 rounded-lg">
+          <KeyRound className="w-4 h-4" />
+        </div>
+        <h3 className="font-bold text-gray-900 text-base tracking-tight">Credentials for Demo</h3>
+      </div>
+      <p className="text-xs text-red-500 font-medium italic mb-4">*(Not in actual deployment)</p>
+
+      {/* Credentials List */}
+      <div className="space-y-2.5 text-xs">
+        {/* 1. Hospital Admin */}
+        <div className={`p-2.5 rounded-xl border transition-all ${currentTab === 'admin' ? 'bg-brand-50/80 border-brand-300 ring-1 ring-brand-300' : 'bg-slate-50/80 border-gray-200'}`}>
+          <div className="flex items-center justify-between mb-1">
+            <span className="font-bold text-slate-800 flex items-center gap-1.5">
+              <Building2 className="w-3.5 h-3.5 text-brand-600" />
+              Hospital Admin
+            </span>
+            {onAutoFill && (
+              <button
+                type="button"
+                onClick={() => onAutoFill('admin')}
+                className="text-[11px] font-semibold text-brand-700 bg-white border border-brand-200 hover:bg-brand-50 px-2 py-0.5 rounded shadow-xs transition-colors"
+              >
+                Auto Fill
+              </button>
+            )}
+          </div>
+          <div className="space-y-1 font-mono text-xs">
+            <div 
+              onClick={() => handleCopy('t@t.com', 'admin-email')}
+              className="flex items-center justify-between px-2.5 py-1 bg-white rounded border border-gray-200 hover:border-brand-400 cursor-pointer group transition-colors"
+              title="Click to copy"
+            >
+              <span className="text-gray-800 font-semibold select-all">t@t.com</span>
+              {copiedKey === 'admin-email' ? (
+                <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              ) : (
+                <Copy className="w-3.5 h-3.5 text-gray-400 group-hover:text-brand-600 shrink-0 transition-colors" />
+              )}
+            </div>
+            <div 
+              onClick={() => handleCopy('1234567890', 'admin-pass')}
+              className="flex items-center justify-between px-2.5 py-1 bg-white rounded border border-gray-200 hover:border-brand-400 cursor-pointer group transition-colors"
+              title="Click to copy"
+            >
+              <span className="text-gray-800 select-all">1234567890</span>
+              {copiedKey === 'admin-pass' ? (
+                <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              ) : (
+                <Copy className="w-3.5 h-3.5 text-gray-400 group-hover:text-brand-600 shrink-0 transition-colors" />
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* 2. Doctor */}
+        <div className={`p-2.5 rounded-xl border transition-all ${currentTab === 'doctor' ? 'bg-indigo-50/80 border-indigo-300 ring-1 ring-indigo-300' : 'bg-slate-50/80 border-gray-200'}`}>
+          <div className="flex items-center justify-between mb-1">
+            <span className="font-bold text-slate-800 flex items-center gap-1.5">
+              <Stethoscope className="w-3.5 h-3.5 text-indigo-600" />
+              Doctor
+            </span>
+            {onAutoFill && (
+              <button
+                type="button"
+                onClick={() => onAutoFill('doctor')}
+                className="text-[11px] font-semibold text-indigo-700 bg-white border border-indigo-200 hover:bg-indigo-50 px-2 py-0.5 rounded shadow-xs transition-colors"
+              >
+                Auto Fill
+              </button>
+            )}
+          </div>
+          <div className="space-y-1 font-mono text-xs">
+            <div 
+              onClick={() => handleCopy('7602991068', 'doc-phone')}
+              className="flex items-center justify-between px-2.5 py-1 bg-white rounded border border-gray-200 hover:border-indigo-400 cursor-pointer group transition-colors"
+              title="Click to copy"
+            >
+              <span className="text-gray-800 font-semibold select-all">7602991068</span>
+              {copiedKey === 'doc-phone' ? (
+                <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              ) : (
+                <Copy className="w-3.5 h-3.5 text-gray-400 group-hover:text-indigo-600 shrink-0 transition-colors" />
+              )}
+            </div>
+            <div 
+              onClick={() => handleCopy('1234567890', 'doc-pass')}
+              className="flex items-center justify-between px-2.5 py-1 bg-white rounded border border-gray-200 hover:border-indigo-400 cursor-pointer group transition-colors"
+              title="Click to copy"
+            >
+              <span className="text-gray-800 select-all font-sans font-medium">Pass : <span className="font-mono font-semibold">1234567890</span></span>
+              {copiedKey === 'doc-pass' ? (
+                <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              ) : (
+                <Copy className="w-3.5 h-3.5 text-gray-400 group-hover:text-indigo-600 shrink-0 transition-colors" />
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* 3. Receptionist */}
+        <div className={`p-2.5 rounded-xl border transition-all ${currentTab === 'receptionist' ? 'bg-amber-50/80 border-amber-300 ring-1 ring-amber-300' : 'bg-slate-50/80 border-gray-200'}`}>
+          <div className="flex items-center justify-between mb-1">
+            <span className="font-bold text-slate-800 flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5 text-amber-600" />
+              Receptionist
+            </span>
+            {onAutoFill && (
+              <button
+                type="button"
+                onClick={() => onAutoFill('receptionist')}
+                className="text-[11px] font-semibold text-amber-800 bg-white border border-amber-200 hover:bg-amber-50 px-2 py-0.5 rounded shadow-xs transition-colors"
+              >
+                Auto Fill
+              </button>
+            )}
+          </div>
+          <div className="space-y-1 font-mono text-xs">
+            <div 
+              onClick={() => handleCopy('r@r.com', 'rec-email')}
+              className="flex items-center justify-between px-2.5 py-1 bg-white rounded border border-gray-200 hover:border-amber-400 cursor-pointer group transition-colors"
+              title="Click to copy"
+            >
+              <span className="text-gray-800 font-semibold select-all">r@r.com</span>
+              {copiedKey === 'rec-email' ? (
+                <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              ) : (
+                <Copy className="w-3.5 h-3.5 text-gray-400 group-hover:text-amber-600 shrink-0 transition-colors" />
+              )}
+            </div>
+            <div 
+              onClick={() => handleCopy('Reception@123', 'rec-pass')}
+              className="flex items-center justify-between px-2.5 py-1 bg-white rounded border border-gray-200 hover:border-amber-400 cursor-pointer group transition-colors"
+              title="Click to copy"
+            >
+              <span className="text-gray-800 select-all font-sans font-medium">Pass : <span className="font-mono font-semibold">Reception@123</span></span>
+              {copiedKey === 'rec-pass' ? (
+                <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              ) : (
+                <Copy className="w-3.5 h-3.5 text-gray-400 group-hover:text-amber-600 shrink-0 transition-colors" />
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* 4. Patient Portal */}
+        <div className={`p-2.5 rounded-xl border transition-all ${currentTab === 'patient' ? 'bg-emerald-50/80 border-emerald-300 ring-1 ring-emerald-300' : 'bg-slate-50/80 border-gray-200'}`}>
+          <div className="flex items-center justify-between mb-1">
+            <span className="font-bold text-slate-800 flex items-center gap-1.5">
+              <UserCircle className="w-3.5 h-3.5 text-emerald-600" />
+              Patient Portal <span className="text-[10px] text-emerald-700 bg-emerald-100/90 px-1.5 py-0.5 rounded font-semibold">OTP Only</span>
+            </span>
+            {onAutoFill && (
+              <button
+                type="button"
+                onClick={() => onAutoFill('patient')}
+                className="text-[11px] font-semibold text-emerald-800 bg-white border border-emerald-200 hover:bg-emerald-50 px-2 py-0.5 rounded shadow-xs transition-colors"
+              >
+                Auto Fill
+              </button>
+            )}
+          </div>
+          <div className="space-y-1 font-mono text-xs">
+            <div className="px-2.5 py-1 bg-white rounded border border-gray-200 text-gray-600 font-sans text-[11px]">
+              6297796553
+            </div>
+            <div 
+              onClick={() => handleCopy('123456', 'pat-otp')}
+              className="flex items-center justify-between px-2.5 py-1 bg-white rounded border border-gray-200 hover:border-emerald-400 cursor-pointer group transition-colors"
+              title="Click to copy OTP"
+            >
+              <span className="text-gray-800 select-all font-sans font-medium">OTP : <span className="font-mono font-bold text-emerald-700 text-xs">123456</span> <span className="text-gray-500 text-[10px]">(Only)</span></span>
+              {copiedKey === 'pat-otp' ? (
+                <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              ) : (
+                <Copy className="w-3.5 h-3.5 text-gray-400 group-hover:text-emerald-600 shrink-0 transition-colors" />
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 4. Floating Quick-Access Drawer Widget (Global Floating Pill in App.jsx)
 export function FloatingJudgeCredentials() {
   const [isOpen, setIsOpen] = useState(false);
   const [copiedKey, setCopiedKey] = useState(null);

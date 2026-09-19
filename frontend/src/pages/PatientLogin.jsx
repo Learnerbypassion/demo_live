@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Shield, ArrowRight, Lock, Phone } from 'lucide-react';
+import { ArrowLeft, Shield, ArrowRight } from 'lucide-react';
 import { api } from '../services/api';
 import { useGlobal } from '../context/GlobalContext';
+import { DemoCredentialsSideBox } from '../components/JudgeCredentials';
 
 export default function PatientLogin() {
   const navigate = useNavigate();
   const { handleAuthSuccess } = useGlobal();
-  const [loginMode, setLoginMode] = useState('otp'); // 'otp' | 'password'
   const [step, setStep] = useState(1);
   const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -49,19 +48,16 @@ export default function PatientLogin() {
     }
   };
 
-  const handlePasswordLogin = async (e) => {
-    if (e) e.preventDefault();
+  const handleAutoFill = (type) => {
     setError('');
-    setLoading(true);
-    try {
-      const res = await api.loginPatient(phone, password);
-      handleAuthSuccess(res.token, { ...res.patient, role: 'patient' });
-      navigate('/patient-dashboard');
-    } catch (err) {
-      // Fallback hint for evaluators
-      setError(err.message || 'Password login failed. You can switch to OTP Login (OTP: 123456)');
-    } finally {
-      setLoading(false);
+    if (type === 'patient') {
+      if (step === 1) {
+        setPhone('9876543210');
+      } else {
+        setOtp('123456');
+      }
+    } else {
+      navigate('/hospital-login');
     }
   };
 
@@ -77,104 +73,29 @@ export default function PatientLogin() {
         Back to Portal
       </button>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
-      >
-        {/* Header */}
-        <div className="bg-brand-900 px-6 py-6 sm:px-8 sm:py-8 text-white text-center">
-          <div className="inline-flex justify-center mb-3 sm:mb-4">
-            <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="Dhanvantri" className="w-16 h-16 sm:w-20 sm:h-20 drop-shadow-md rounded-2xl object-contain bg-white p-2 shadow-md" />
-          </div>
-          <h2 className="text-xl sm:text-2xl font-semibold">Dhanvantri Patient Portal</h2>
-          <p className="text-brand-100 mt-1.5 sm:mt-2 text-xs sm:text-sm">Access your medical history securely</p>
-        </div>
-
-        {/* Tab switcher: OTP vs Password Login */}
-        <div className="flex border-b border-gray-100 bg-gray-50/50">
-          <button
-            type="button"
-            onClick={() => { setLoginMode('otp'); setError(''); }}
-            className={`flex-1 py-3 text-xs font-semibold tracking-wide uppercase transition-colors relative ${
-              loginMode === 'otp' ? 'text-brand-700 bg-white' : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            OTP Verification
-            {loginMode === 'otp' && (
-              <motion.div layoutId="patientTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-600" />
-            )}
-          </button>
-          <button
-            type="button"
-            onClick={() => { setLoginMode('password'); setError(''); }}
-            className={`flex-1 py-3 text-xs font-semibold tracking-wide uppercase transition-colors relative ${
-              loginMode === 'password' ? 'text-brand-700 bg-white' : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Password Login
-            {loginMode === 'password' && (
-              <motion.div layoutId="patientTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-600" />
-            )}
-          </button>
-        </div>
-
-        {/* Form Content */}
-        <div className="p-5 sm:p-8">
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg font-medium">
-              {error}
+      <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-10 w-full max-w-5xl mx-auto my-auto py-4 sm:py-0">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden shrink-0"
+        >
+          {/* Header */}
+          <div className="bg-brand-900 px-6 py-6 sm:px-8 sm:py-8 text-white text-center">
+            <div className="inline-flex justify-center mb-3 sm:mb-4">
+              <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="Dhanvantri" className="w-16 h-16 sm:w-20 sm:h-20 drop-shadow-md rounded-2xl object-contain bg-white p-2 shadow-md" />
             </div>
-          )}
+            <h2 className="text-xl sm:text-2xl font-semibold">Dhanvantri Patient Portal</h2>
+            <p className="text-brand-100 mt-1.5 sm:mt-2 text-xs sm:text-sm">Access your medical history securely via OTP</p>
+          </div>
 
-          {loginMode === 'password' ? (
-            /* Password Login Mode */
-            <form onSubmit={handlePasswordLogin} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Mobile Number</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-slate-500 font-medium border-r pr-2 border-slate-300">+91</span>
-                  </div>
-                  <input 
-                    type="tel" 
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    maxLength={10}
-                    required
-                    className="block w-full pl-16 pr-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-base font-medium" 
-                    placeholder="7602991068" 
-                  />
-                </div>
+          {/* Form Content */}
+          <div className="p-5 sm:p-8">
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg font-medium">
+                {error}
               </div>
+            )}
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input 
-                    type="password" 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm font-medium" 
-                    placeholder="••••••••" 
-                  />
-                </div>
-              </div>
-
-              <button 
-                type="submit" 
-                disabled={phone.length < 10 || !password || loading}
-                className="w-full flex items-center justify-center py-2.5 px-4 border border-transparent rounded-xl shadow-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all mt-2"
-              >
-                {loading ? 'Logging in...' : 'Sign In with Password'}
-              </button>
-            </form>
-          ) : (
-            /* OTP Login Mode */
             <AnimatePresence mode="wait">
               {step === 1 ? (
                 <motion.form
@@ -187,7 +108,9 @@ export default function PatientLogin() {
                 >
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Mobile Number</label>
-                    <p className="text-xs text-slate-500 mb-3">Please enter your registered mobile number to receive a secure OTP.</p>
+                    <p className="text-xs text-slate-500 mb-3">
+                      Enter any 10-digit mobile number to receive a demo OTP (<b>123456</b>).
+                    </p>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <span className="text-slate-500 font-medium border-r pr-2 border-slate-300">+91</span>
@@ -199,7 +122,7 @@ export default function PatientLogin() {
                         maxLength={10}
                         required
                         className="block w-full pl-16 pr-3 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-lg tracking-wider font-medium" 
-                        placeholder="7602991068" 
+                        placeholder="98765 43210" 
                       />
                     </div>
                   </div>
@@ -240,7 +163,7 @@ export default function PatientLogin() {
                         type="text" 
                         value={otp}
                         onChange={(e) => setOtp(e.target.value)}
-                        maxLength={10}
+                        maxLength={6}
                         required
                         className="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-lg tracking-widest font-bold text-center" 
                         placeholder="123456" 
@@ -268,9 +191,12 @@ export default function PatientLogin() {
                 </motion.form>
               )}
             </AnimatePresence>
-          )}
-        </div>
-      </motion.div>
+          </div>
+        </motion.div>
+
+        {/* Dotted border Demo Credentials Box */}
+        <DemoCredentialsSideBox onAutoFill={handleAutoFill} currentTab="patient" />
+      </div>
     </div>
   );
 }

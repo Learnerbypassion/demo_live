@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Building2, Stethoscope, Users, ArrowLeft, ShieldCheck, Lock, FileText, UserCircle, Mail, Key } from 'lucide-react';
 import { api } from '../services/api';
 import { useGlobal } from '../context/GlobalContext';
+import { DemoCredentialsSideBox } from '../components/JudgeCredentials';
 
 export default function HospitalLogin() {
   const navigate = useNavigate();
@@ -74,6 +75,33 @@ export default function HospitalLogin() {
     }
   };
 
+  const handleAutoFill = (type) => {
+    setError('');
+    setIsRegistering(false);
+    if (type === 'admin') {
+      setActiveTab('admin');
+      setAdminForm({
+        name: 't@t.com',
+        registration_no: '',
+        password: '1234567890',
+      });
+    } else if (type === 'doctor') {
+      setActiveTab('doctor');
+      setStaffForm({
+        email: '7602991068',
+        password: '1234567890',
+      });
+    } else if (type === 'receptionist') {
+      setActiveTab('receptionist');
+      setStaffForm({
+        email: 'r@r.com',
+        password: 'Reception@123',
+      });
+    } else if (type === 'patient') {
+      navigate('/patient-login');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center p-4 sm:p-6 relative">
       
@@ -86,11 +114,12 @@ export default function HospitalLogin() {
         Back to Portal
       </button>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
-      >
+      <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-10 w-full max-w-5xl mx-auto my-auto py-4 sm:py-0">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden shrink-0"
+        >
         {/* Header */}
         <div className="bg-brand-900 px-6 py-6 sm:px-8 sm:py-8 text-white text-center">
           <div className="inline-flex justify-center mb-3 sm:mb-4">
@@ -370,6 +399,10 @@ export default function HospitalLogin() {
           </AnimatePresence>
         </div>
       </motion.div>
+
+      {/* Dotted border Demo Credentials Box */}
+      <DemoCredentialsSideBox onAutoFill={handleAutoFill} currentTab={activeTab} />
     </div>
-  );
+  </div>
+);
 }

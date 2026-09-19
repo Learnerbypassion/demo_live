@@ -10,7 +10,6 @@ import ReceptionistDashboard from './pages/ReceptionistDashboard';
 import DoctorDashboard from './pages/DoctorDashboard';
 import PatientDashboard from './pages/PatientDashboard';
 import MobileUpload from './pages/MobileUpload';
-import { FloatingJudgeCredentials } from './components/JudgeCredentials';
 
 function App() {
   return (
@@ -29,7 +28,6 @@ function App() {
           {/* QR-code phone handoff — /mobile-upload/:token (no base prefix; BrowserRouter basename handles /dhanvantari) */}
           <Route path="/mobile-upload/:token" element={<MobileUpload />} />
         </Routes>
-        <FloatingJudgeCredentials />
       </BrowserRouter>
     </GlobalProvider>
   );
