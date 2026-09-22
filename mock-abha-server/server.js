@@ -6,8 +6,6 @@ const crypto = require("crypto");
 const { AbhaPatient, seedDefaultPatients, DEFAULT_SEEDS } = require("./models/AbhaPatient");
 const { AbhaRecord, seedDefaultRecords, DEFAULT_RECORD_SEEDS } = require("./models/AbhaRecord");
 
-
-// Universal markdown table parser to guarantee 100% complete lab extraction
 function parseLabsFromSummary(text) {
   if (!text) return [];
   const labs = [];
@@ -64,7 +62,6 @@ app.use(express.urlencoded({ extended: true }));
 
 let isDbConnected = false;
 
-// Connect to MongoDB
 mongoose.connect(MONGO_URI)
   .then(async () => {
     isDbConnected = true;
@@ -83,9 +80,6 @@ function normalizeAbha(raw) {
   return `${digits.slice(0, 2)}-${digits.slice(2, 6)}-${digits.slice(6, 10)}-${digits.slice(10)}`;
 }
 
-// ---------- API Routes ----------
-
-// 1. Health check & status
 app.get("/api/health", async (req, res) => {
   let recordCount = 0;
   let patientCount = 0;
@@ -107,7 +101,6 @@ app.get("/api/health", async (req, res) => {
   });
 });
 
-// 2. Lookup Patient by ABHA ID or phone (Single Source of Truth)
 app.get("/api/patients/:query", async (req, res) => {
   try {
     const query = req.params.query.trim();
@@ -125,7 +118,6 @@ app.get("/api/patients/:query", async (req, res) => {
       });
     }
 
-    // Fallback to in-memory seeds if DB pending
     if (!patient) {
       patient = DEFAULT_SEEDS.find(p =>
         normalizeAbha(p.abha_id) === normalized ||
@@ -155,7 +147,6 @@ app.get("/api/patients/:query", async (req, res) => {
   }
 });
 
-// 3. Register or Update Patient in ABHA Central Registry
 app.post("/api/patients", async (req, res) => {
   try {
     const { abha_id, name, dob, age, gender, phone, address, blood_group } = req.body;
@@ -183,7 +174,6 @@ app.post("/api/patients", async (req, res) => {
   }
 });
 
-// 4. Push Clinical Health Record (from Doctor Consultation) with Dedup Guard
 app.post("/api/records", async (req, res) => {
   try {
     const {
@@ -266,7 +256,7 @@ app.post("/api/records", async (req, res) => {
     };
 
     if (isDbConnected) {
-      // Idempotent Upsert: if session_id exists for this abha_id, update it to prevent duplicate cards
+
       if (session_id) {
         const existing = await AbhaRecord.findOne({ abha_id: normAbha, session_id });
         if (existing) {
@@ -299,7 +289,6 @@ app.post("/api/records", async (req, res) => {
   }
 });
 
-// 5. Get Longitudinal Health Records for an ABHA ID (Cross-Hospital History)
 app.get("/api/records/:abha_id", async (req, res) => {
   try {
     const normAbha = normalizeAbha(req.params.abha_id);
@@ -314,7 +303,6 @@ app.get("/api/records/:abha_id", async (req, res) => {
       }).sort({ date: -1, created_at: -1 });
     }
 
-    // Fallback to in-memory seeds if DB pending or empty for this patient
     if (records.length === 0) {
       records = DEFAULT_RECORD_SEEDS.filter(r =>
         normalizeAbha(r.abha_id) === normAbha ||
@@ -359,7 +347,6 @@ app.get("/api/records/:abha_id", async (req, res) => {
   }
 });
 
-// 6. Visual Live Dashboard (Viewable in Browser at http://localhost:8005)
 app.get("/", async (req, res) => {
   let records = [];
   let patientCount = 0;

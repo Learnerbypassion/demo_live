@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  KeyRound, 
-  Copy, 
-  Check, 
-  Building2, 
-  Users, 
-  UserCircle, 
+import {
+  KeyRound,
+  Copy,
+  Check,
+  Building2,
+  Users,
+  UserCircle,
   Stethoscope,
-  ArrowRight, 
+  ArrowRight,
   ExternalLink,
   ShieldCheck,
   ChevronDown,
@@ -89,7 +89,6 @@ export default function JudgeCredentials({ variant = 'card', onFill, currentTab 
     }, 2000);
   };
 
-  // 1. Compact Variant
   if (variant === 'compact') {
     return (
       <div className="w-full bg-gradient-to-br from-slate-900 to-brand-950 text-white rounded-xl p-4 shadow-lg border border-slate-700/60 mt-6">
@@ -125,8 +124,8 @@ export default function JudgeCredentials({ variant = 'card', onFill, currentTab 
                 <div
                   key={cred.id}
                   className={`p-2.5 rounded-lg border transition-all ${
-                    isCurrent 
-                      ? 'bg-brand-900/60 border-brand-400/70 shadow-sm' 
+                    isCurrent
+                      ? 'bg-brand-900/60 border-brand-400/70 shadow-sm'
                       : 'bg-slate-800/50 border-slate-700/60 hover:border-slate-600'
                   }`}
                 >
@@ -180,7 +179,6 @@ export default function JudgeCredentials({ variant = 'card', onFill, currentTab 
     );
   }
 
-  // 2. Full Card Variant
   return (
     <motion.div
       initial={{ opacity: 0, y: 15 }}
@@ -291,7 +289,6 @@ export default function JudgeCredentials({ variant = 'card', onFill, currentTab 
   );
 }
 
-// 3. Side Box with Dotted Border (for side placement next to Login Card)
 export function DemoCredentialsSideBox({ onAutoFill, currentTab }) {
   const [copiedKey, setCopiedKey] = useState(null);
 
@@ -303,7 +300,7 @@ export function DemoCredentialsSideBox({ onAutoFill, currentTab }) {
 
   return (
     <div className="w-full max-w-sm bg-white/95 backdrop-blur-sm border-2 border-dotted border-slate-400 hover:border-slate-500 rounded-2xl p-5 sm:p-6 shadow-sm transition-all">
-      {/* Header */}
+      {}
       <div className="flex items-center gap-2 mb-1">
         <div className="p-1.5 bg-amber-100 text-amber-800 rounded-lg">
           <KeyRound className="w-4 h-4" />
@@ -312,9 +309,9 @@ export function DemoCredentialsSideBox({ onAutoFill, currentTab }) {
       </div>
       <p className="text-xs text-red-500 font-medium italic mb-4">*(Not in actual deployment)</p>
 
-      {/* Credentials List */}
+      {}
       <div className="space-y-2.5 text-xs">
-        {/* 1. Hospital Admin */}
+        {}
         <div className={`p-2.5 rounded-xl border transition-all ${currentTab === 'admin' ? 'bg-brand-50/80 border-brand-300 ring-1 ring-brand-300' : 'bg-slate-50/80 border-gray-200'}`}>
           <div className="flex items-center justify-between mb-1">
             <span className="font-bold text-slate-800 flex items-center gap-1.5">
@@ -332,7 +329,7 @@ export function DemoCredentialsSideBox({ onAutoFill, currentTab }) {
             )}
           </div>
           <div className="space-y-1 font-mono text-xs">
-            <div 
+            <div
               onClick={() => handleCopy('t@t.com', 'admin-email')}
               className="flex items-center justify-between px-2.5 py-1 bg-white rounded border border-gray-200 hover:border-brand-400 cursor-pointer group transition-colors"
               title="Click to copy"
@@ -344,7 +341,7 @@ export function DemoCredentialsSideBox({ onAutoFill, currentTab }) {
                 <Copy className="w-3.5 h-3.5 text-gray-400 group-hover:text-brand-600 shrink-0 transition-colors" />
               )}
             </div>
-            <div 
+            <div
               onClick={() => handleCopy('1234567890', 'admin-pass')}
               className="flex items-center justify-between px-2.5 py-1 bg-white rounded border border-gray-200 hover:border-brand-400 cursor-pointer group transition-colors"
               title="Click to copy"
@@ -359,7 +356,7 @@ export function DemoCredentialsSideBox({ onAutoFill, currentTab }) {
           </div>
         </div>
 
-        {/* 2. Doctor */}
+        {}
         <div className={`p-2.5 rounded-xl border transition-all ${currentTab === 'doctor' ? 'bg-indigo-50/80 border-indigo-300 ring-1 ring-indigo-300' : 'bg-slate-50/80 border-gray-200'}`}>
           <div className="flex items-center justify-between mb-1">
             <span className="font-bold text-slate-800 flex items-center gap-1.5">
@@ -377,7 +374,7 @@ export function DemoCredentialsSideBox({ onAutoFill, currentTab }) {
             )}
           </div>
           <div className="space-y-1 font-mono text-xs">
-            <div 
+            <div
               onClick={() => handleCopy('7602991068', 'doc-phone')}
               className="flex items-center justify-between px-2.5 py-1 bg-white rounded border border-gray-200 hover:border-indigo-400 cursor-pointer group transition-colors"
               title="Click to copy"
@@ -389,7 +386,7 @@ export function DemoCredentialsSideBox({ onAutoFill, currentTab }) {
                 <Copy className="w-3.5 h-3.5 text-gray-400 group-hover:text-indigo-600 shrink-0 transition-colors" />
               )}
             </div>
-            <div 
+            <div
               onClick={() => handleCopy('1234567890', 'doc-pass')}
               className="flex items-center justify-between px-2.5 py-1 bg-white rounded border border-gray-200 hover:border-indigo-400 cursor-pointer group transition-colors"
               title="Click to copy"
@@ -404,7 +401,7 @@ export function DemoCredentialsSideBox({ onAutoFill, currentTab }) {
           </div>
         </div>
 
-        {/* 3. Receptionist */}
+        {}
         <div className={`p-2.5 rounded-xl border transition-all ${currentTab === 'receptionist' ? 'bg-amber-50/80 border-amber-300 ring-1 ring-amber-300' : 'bg-slate-50/80 border-gray-200'}`}>
           <div className="flex items-center justify-between mb-1">
             <span className="font-bold text-slate-800 flex items-center gap-1.5">
@@ -422,7 +419,7 @@ export function DemoCredentialsSideBox({ onAutoFill, currentTab }) {
             )}
           </div>
           <div className="space-y-1 font-mono text-xs">
-            <div 
+            <div
               onClick={() => handleCopy('r@r.com', 'rec-email')}
               className="flex items-center justify-between px-2.5 py-1 bg-white rounded border border-gray-200 hover:border-amber-400 cursor-pointer group transition-colors"
               title="Click to copy"
@@ -434,7 +431,7 @@ export function DemoCredentialsSideBox({ onAutoFill, currentTab }) {
                 <Copy className="w-3.5 h-3.5 text-gray-400 group-hover:text-amber-600 shrink-0 transition-colors" />
               )}
             </div>
-            <div 
+            <div
               onClick={() => handleCopy('Reception@123', 'rec-pass')}
               className="flex items-center justify-between px-2.5 py-1 bg-white rounded border border-gray-200 hover:border-amber-400 cursor-pointer group transition-colors"
               title="Click to copy"
@@ -449,7 +446,7 @@ export function DemoCredentialsSideBox({ onAutoFill, currentTab }) {
           </div>
         </div>
 
-        {/* 4. Patient Portal */}
+        {}
         <div className={`p-2.5 rounded-xl border transition-all ${currentTab === 'patient' ? 'bg-emerald-50/80 border-emerald-300 ring-1 ring-emerald-300' : 'bg-slate-50/80 border-gray-200'}`}>
           <div className="flex items-center justify-between mb-1">
             <span className="font-bold text-slate-800 flex items-center gap-1.5">
@@ -470,7 +467,7 @@ export function DemoCredentialsSideBox({ onAutoFill, currentTab }) {
             <div className="px-2.5 py-1 bg-white rounded border border-gray-200 text-gray-600 font-sans text-[11px]">
               6297796553
             </div>
-            <div 
+            <div
               onClick={() => handleCopy('123456', 'pat-otp')}
               className="flex items-center justify-between px-2.5 py-1 bg-white rounded border border-gray-200 hover:border-emerald-400 cursor-pointer group transition-colors"
               title="Click to copy OTP"
@@ -489,7 +486,6 @@ export function DemoCredentialsSideBox({ onAutoFill, currentTab }) {
   );
 }
 
-// 4. Floating Quick-Access Drawer Widget (Global Floating Pill in App.jsx)
 export function FloatingJudgeCredentials() {
   const [isOpen, setIsOpen] = useState(false);
   const [copiedKey, setCopiedKey] = useState(null);
@@ -503,7 +499,6 @@ export function FloatingJudgeCredentials() {
     }, 2000);
   };
 
-  // Close modal when pressing Escape key
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && isOpen) {
@@ -516,7 +511,7 @@ export function FloatingJudgeCredentials() {
 
   return (
     <>
-      {/* Floating Action Pill button (Bottom Right) */}
+      {}
       <div className="fixed bottom-4 right-4 z-50">
         <motion.button
           whileHover={{ scale: 1.05 }}
@@ -531,10 +526,10 @@ export function FloatingJudgeCredentials() {
         </motion.button>
       </div>
 
-      {/* Slide-over Drawer / Modal with Backdrop Click to Close */}
+      {}
       <AnimatePresence>
         {isOpen && (
-          <div 
+          <div
             onClick={() => setIsOpen(false)}
             className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-xs cursor-pointer select-none"
           >
@@ -546,7 +541,7 @@ export function FloatingJudgeCredentials() {
               onClick={(e) => e.stopPropagation()}
               className="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[90vh] cursor-default select-text"
             >
-              {/* Header */}
+              {}
               <div className="bg-gradient-to-r from-slate-900 via-brand-950 to-slate-900 text-white px-5 py-4 flex items-center justify-between">
                 <div className="flex items-center space-x-2.5">
                   <div className="p-1.5 rounded-lg bg-amber-400/20 text-amber-300 border border-amber-400/30">
@@ -566,7 +561,7 @@ export function FloatingJudgeCredentials() {
                 </button>
               </div>
 
-              {/* Credentials List */}
+              {}
               <div className="p-4 sm:p-5 space-y-3 overflow-y-auto">
                 {DEMO_CREDENTIALS.map((cred) => {
                   const Icon = cred.icon;
@@ -628,10 +623,9 @@ export function FloatingJudgeCredentials() {
                 })}
               </div>
 
-              {/* Footer */}
               <div className="p-3 bg-gray-50 border-t border-gray-200 text-center">
                 <p className="text-xs text-gray-600">
-                  Built for rapid evaluation in SIH / Hackathon presentations.
+                  Dhanvantri Clinical Intake &amp; Healthcare Management System
                 </p>
               </div>
             </motion.div>

@@ -1,18 +1,3 @@
-/**
- * Voice & Indic Language Service (Sarvam AI & Bhashini Proxy)
- *
- * Provides Indian mother-tongue speech synthesis (TTS) with authentic regional accents
- * and speech recognition (ASR) tailored for Indian healthcare kiosk users.
- *
- * Features:
- *   - Built-in Persistent Audio Cache (backend/audio_cache):
- *     Initial prompts and common commands for all languages are stored on disk.
- *     Subsequent calls for the same prompt return in <5ms with 0 network latency!
- *   - Sarvam AI Bulbul v3 TTS + Mayura translation
- *   - Bhashini ULCA fallback
- *   - Web Speech API client fallback
- */
-
 const express = require("express");
 const axios = require("axios");
 const path = require("path");
@@ -38,7 +23,6 @@ if (!fs.existsSync(PRIMARY_AUDIO_CACHE_DIR)) {
   try { fs.mkdirSync(PRIMARY_AUDIO_CACHE_DIR, { recursive: true }); } catch (_) {}
 }
 
-// Sarvam BCP-47 Language Codes
 const SARVAM_LANG_CODE = {
   "English":   "en-IN",
   "Hindi":     "hi-IN",
@@ -53,7 +37,6 @@ const SARVAM_LANG_CODE = {
   "Odia":      "od-IN",
 };
 
-// Bhashini 2-letter Language Codes
 const BHASINI_LANG_CODE = {
   "English":  "en",
   "Hindi":    "hi",
@@ -65,7 +48,6 @@ const BHASINI_LANG_CODE = {
   "Gujarati": "gu",
 };
 
-// Voice speakers for Bulbul v3
 const SARVAM_VOICE_BY_LANG = {
   "bn-IN": "suhani",
   "hi-IN": "roopa",
@@ -80,7 +62,6 @@ const SARVAM_VOICE_BY_LANG = {
   "en-IN": "roopa",
 };
 
-// --- Cache Helpers ---
 function getCacheKey(text, lang, speaker = "") {
   return crypto.createHash("md5").update(`${lang}::${speaker}::${text.trim()}`).digest("hex");
 }
@@ -169,7 +150,6 @@ function getActiveProvider() {
   return "none";
 }
 
-// GET /api/bhasini/status
 router.get("/status", (req, res) => {
   const sKey = getSarvamKey();
   const bCreds = getBhasiniCredentials();
@@ -190,8 +170,6 @@ router.get("/status", (req, res) => {
   });
 });
 
-// POST /api/bhasini/tts
-// Body: { text: string, language: string, speaker?: string }
 router.post("/tts", async (req, res) => {
   const { text, language = "Hindi", speaker } = req.body;
   if (!text) return res.status(400).json({ error: "text is required" });
@@ -199,7 +177,6 @@ router.post("/tts", async (req, res) => {
   const targetLang = SARVAM_LANG_CODE[language] || "hi-IN";
   const activeSpeaker = speaker || SARVAM_VOICE_BY_LANG[targetLang] || "roopa";
 
-  // 1. Check local audio cache first (Instant <5ms return!)
   const cached = getCachedAudio(text, language, activeSpeaker);
   if (cached && cached.audioContent) {
     return res.json({
@@ -220,15 +197,10 @@ router.post("/tts", async (req, res) => {
     });
   }
 
-  // -------------------------------------------------------------
-  // 2. SARVAM AI (Bulbul v3 TTS + Mayura translation)
-  // -------------------------------------------------------------
   if (sarvamKey) {
     try {
       let textToSpeak = text;
 
-      // If prompt is in English and patient chose an Indian regional language,
-      // translate it with Sarvam Mayura into their mother tongue!
       const hasEnglish = /[a-zA-Z]{3,}/.test(text);
       if (hasEnglish && targetLang !== "en-IN") {
         try {
@@ -259,7 +231,6 @@ router.post("/tts", async (req, res) => {
         }
       }
 
-      // Generate speech via Sarvam Bulbul v3 TTS
       const ttsResp = await axios.post(
         `${SARVAM_URL}/text-to-speech`,
         {
@@ -294,7 +265,6 @@ router.post("/tts", async (req, res) => {
         translated_text: textToSpeak !== text ? textToSpeak : null,
       };
 
-      // Store in persistent cache so next time it is instantaneous!
       setCachedAudio(text, language, activeSpeaker, responsePayload);
 
       return res.json(responsePayload);
@@ -310,9 +280,6 @@ router.post("/tts", async (req, res) => {
     }
   }
 
-  // -------------------------------------------------------------
-  // 3. BHASHINI ULCA PIPELINE FALLBACK
-  // -------------------------------------------------------------
   if (bhasiniKey) {
     try {
       const srcLang = BHASINI_LANG_CODE[language] || "hi";
@@ -363,8 +330,6 @@ router.post("/tts", async (req, res) => {
   }
 });
 
-// POST /api/bhasini/asr
-// Body: { audioBase64: string, language: string }
 router.post("/asr", async (req, res) => {
   const sarvamKey = getSarvamKey();
   const bhasiniKey = getBhasiniKey();
@@ -376,7 +341,6 @@ router.post("/asr", async (req, res) => {
   const { audioBase64, language = "Hindi" } = req.body;
   if (!audioBase64) return res.status(400).json({ error: "audioBase64 is required" });
 
-  // 1. Sarvam Saarika ASR
   if (sarvamKey) {
     try {
       const targetLang = SARVAM_LANG_CODE[language] || "unknown";
@@ -411,7 +375,6 @@ router.post("/asr", async (req, res) => {
     }
   }
 
-  // 2. Bhashini ASR
   if (bhasiniKey) {
     try {
       const srcLang = BHASINI_LANG_CODE[language] || "hi";
@@ -457,8 +420,6 @@ router.post("/asr", async (req, res) => {
   }
 });
 
-// POST /api/bhasini/translate
-// Body: { text: string, targetLanguage: string, sourceLanguage?: string }
 router.post("/translate", async (req, res) => {
   const sarvamKey = getSarvamKey();
   if (!sarvamKey) {

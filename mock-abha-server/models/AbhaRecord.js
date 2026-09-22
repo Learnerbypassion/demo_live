@@ -26,11 +26,10 @@ const AbhaRecordSchema = new mongoose.Schema({
   created_at: { type: Date, default: Date.now },
 });
 
-// Idempotency / Dedup guard: prevent duplicate visit entries on retries or double-clicks
 AbhaRecordSchema.index({ abha_id: 1, session_id: 1 }, { unique: true, sparse: true });
 
 const DEFAULT_RECORD_SEEDS = [
-  // 1. Rajesh Kumar (98-7654-3210-5678) — Cardiology & Hypertension Followup
+
   {
     record_id: "REC-2025-0814-01",
     abha_id: "98-7654-3210-5678",
@@ -82,7 +81,6 @@ const DEFAULT_RECORD_SEEDS = [
     }
   },
 
-  // 2. Rajesh Kumar (98-7654-3210-5678) — Previous Internal Medicine visit
   {
     record_id: "REC-2025-0210-02",
     abha_id: "98-7654-3210-5678",
@@ -126,7 +124,6 @@ const DEFAULT_RECORD_SEEDS = [
     }
   },
 
-  // 3. Ananya Sharma (12-3456-7890-1234) — Type 2 Diabetes Management
   {
     record_id: "REC-2025-0720-03",
     abha_id: "12-3456-7890-1234",
@@ -172,7 +169,6 @@ const DEFAULT_RECORD_SEEDS = [
     }
   },
 
-  // 4. BITTU DEV (76-02991-0681-3344) — Dengue / Acute Febrile Illness
   {
     record_id: "REC-2025-0902-04",
     abha_id: "76-02991-0681-3344",
@@ -218,7 +214,6 @@ const DEFAULT_RECORD_SEEDS = [
     }
   },
 
-  // 5. RISHI DEV (76-02891-0681-3354) — Bronchial Asthma & Allergies
   {
     record_id: "REC-2025-0610-05",
     abha_id: "76-02891-0681-3354",
@@ -263,7 +258,6 @@ const DEFAULT_RECORD_SEEDS = [
     }
   },
 
-  // 6. Priya Patel (11-2233-4455-6677) — Orthopedic Meniscal Strain
   {
     record_id: "REC-2025-0504-06",
     abha_id: "11-2233-4455-6677",

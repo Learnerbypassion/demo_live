@@ -1,11 +1,3 @@
-/**
- * MediKiosk -- AYUSH Dashavidha Pariksha Question API
- *
- * GET /api/ayush/questions -> array of 10 guided MCQ questions
- *
- * Future: move to MongoDB collection for doctor-authored question text
- * via admin UI, enabling updates without redeployment.
- */
 const express = require("express");
 const router  = express.Router();
 

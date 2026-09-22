@@ -15,7 +15,7 @@ export default function PatientLogin() {
   const [otp, setOtp] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const handleSendOtp = async (e) => {
     if (e) e.preventDefault();
     if (phone.length >= 10) {
@@ -64,10 +64,10 @@ export default function PatientLogin() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center p-4 sm:p-6 relative">
-      
-      {/* Top Navigation Bar: Back Button & GitHub Repo Button */}
+
+      {}
       <div className="w-full flex items-center justify-between sm:block mb-4 sm:mb-0">
-        <button 
+        <button
           onClick={() => navigate('/')}
           className="sm:absolute sm:top-8 sm:left-8 flex items-center text-gray-500 hover:text-gray-900 transition-colors font-medium text-sm sm:text-base"
         >
@@ -81,12 +81,12 @@ export default function PatientLogin() {
       </div>
 
       <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-10 w-full max-w-5xl mx-auto my-auto py-4 sm:py-0">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden shrink-0"
         >
-          {/* Header */}
+          {}
           <div className="bg-brand-900 px-6 py-6 sm:px-8 sm:py-8 text-white text-center">
             <div className="inline-flex justify-center mb-3 sm:mb-4">
               <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="Dhanvantri" className="w-16 h-16 sm:w-20 sm:h-20 drop-shadow-md rounded-2xl object-contain bg-white p-2 shadow-md" />
@@ -95,7 +95,7 @@ export default function PatientLogin() {
             <p className="text-brand-100 mt-1.5 sm:mt-2 text-xs sm:text-sm">Access your medical history securely via OTP</p>
           </div>
 
-          {/* Form Content */}
+          {}
           <div className="p-5 sm:p-8">
             {error && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg font-medium">
@@ -122,20 +122,20 @@ export default function PatientLogin() {
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <span className="text-slate-500 font-medium border-r pr-2 border-slate-300">+91</span>
                       </div>
-                      <input 
-                        type="tel" 
+                      <input
+                        type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         maxLength={10}
                         required
-                        className="block w-full pl-16 pr-3 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-lg tracking-wider font-medium" 
-                        placeholder="98765 43210" 
+                        className="block w-full pl-16 pr-3 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-lg tracking-wider font-medium"
+                        placeholder="98765 43210"
                       />
                     </div>
                   </div>
 
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     disabled={phone.length < 10 || loading}
                     className="w-full flex items-center justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                   >
@@ -166,29 +166,29 @@ export default function PatientLogin() {
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <Shield className="h-5 w-5 text-slate-400" />
                       </div>
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         value={otp}
                         onChange={(e) => setOtp(e.target.value)}
                         maxLength={6}
                         required
-                        className="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-lg tracking-widest font-bold text-center" 
-                        placeholder="123456" 
+                        className="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-lg tracking-widest font-bold text-center"
+                        placeholder="123456"
                       />
                     </div>
                   </div>
 
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     disabled={otp.length < 6 || loading}
                     className="w-full flex items-center justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 disabled:opacity-50 transition-all"
                   >
                     {loading ? 'Verifying...' : 'Verify & Secure Login'}
                   </button>
-                  
+
                   <div className="text-center">
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={handleSendOtp}
                       className="text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors"
                     >
@@ -201,7 +201,7 @@ export default function PatientLogin() {
           </div>
         </motion.div>
 
-        {/* Dotted border Demo Credentials Box */}
+        {}
         <DemoCredentialsSideBox onAutoFill={handleAutoFill} currentTab="patient" />
       </div>
     </div>

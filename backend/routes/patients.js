@@ -1,6 +1,3 @@
-/**
- * Add patient / Find patient / Update patient / Get patient sessions (MongoDB / Mongoose).
- */
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const axios = require("axios");
@@ -17,7 +14,6 @@ function serializePatient(p) {
   return obj;
 }
 
-// ---------- List all patients (registration desk / receptionist / doctor) ----------
 router.get("/", requireAuth, requireRole("hospital_admin", "doctor", "receptionist"), async (req, res) => {
   try {
     const patients = await Patient.find({ hospital_id: req.user.hospital_id }).sort({ created_at: -1 });
@@ -27,7 +23,6 @@ router.get("/", requireAuth, requireRole("hospital_admin", "doctor", "receptioni
   }
 });
 
-// ---------- Lookup patient (by abha_id or phone, for Kiosk / check-in) ----------
 router.get("/lookup", async (req, res) => {
   try {
     const { abha_id, phone } = req.query;
@@ -47,7 +42,6 @@ router.get("/lookup", async (req, res) => {
   }
 });
 
-// ---------- Add patient (registration desk) ----------
 router.post("/", requireAuth, requireRole("hospital_admin", "doctor", "receptionist"), async (req, res) => {
   try {
     const { name, dob, aadhar_id, phone, abha_id, language, doctor_id, doctor_format, password, age, gender, address } = req.body;
@@ -79,7 +73,6 @@ router.post("/", requireAuth, requireRole("hospital_admin", "doctor", "reception
   }
 });
 
-// ---------- Find patient (by phone number) ----------
 router.get("/find", requireAuth, requireRole("hospital_admin", "doctor", "receptionist"), async (req, res) => {
   try {
     const { phone } = req.query;
@@ -95,7 +88,6 @@ router.get("/find", requireAuth, requireRole("hospital_admin", "doctor", "recept
   }
 });
 
-// ---------- Get patient by ID ----------
 router.get("/:id", requireAuth, async (req, res) => {
   try {
     const patient = await Patient.findById(req.params.id);
@@ -112,7 +104,6 @@ router.get("/:id", requireAuth, async (req, res) => {
   }
 });
 
-// ---------- Get patient's session history ----------
 router.get("/:id/sessions", requireAuth, async (req, res) => {
   try {
     const patient = await Patient.findById(req.params.id);
@@ -179,7 +170,6 @@ router.get("/:id/sessions", requireAuth, async (req, res) => {
   }
 });
 
-// ---------- Update patient ----------
 router.patch("/:id", requireAuth, async (req, res) => {
   try {
     const patient = await Patient.findById(req.params.id);
@@ -206,8 +196,6 @@ router.patch("/:id", requireAuth, async (req, res) => {
   }
 });
 
-
-// ---------- Get patient's central ABHA records ----------
 router.get("/:id/abha-records", requireAuth, async (req, res) => {
   try {
     const patient = await Patient.findById(req.params.id);
@@ -228,7 +216,6 @@ router.get("/:id/abha-records", requireAuth, async (req, res) => {
   }
 });
 
-// ---------- Direct lookup by ABHA ID for authenticated patient ----------
 router.get("/by-abha/:abhaId/records", requireAuth, async (req, res) => {
   try {
     const ABHA_SERVER_URL = process.env.ABHA_SERVER_URL || "http://localhost:8005";

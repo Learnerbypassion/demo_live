@@ -4,7 +4,6 @@ import { Users, LogOut, UserPlus, Activity, ArrowRight, CheckCircle2, Thermomete
 import { useGlobal } from '../context/GlobalContext';
 import { api, getStoredUser } from '../services/api';
 
-// ─── Helper: format submitted_at to readable time ─────────────────────────────
 function fmtTime(ts) {
   if (!ts) return '';
   try {
@@ -12,7 +11,6 @@ function fmtTime(ts) {
   } catch (_) { return ts; }
 }
 
-// ─── Vitals Station Tab ───────────────────────────────────────────────────────
 function VitalsStation() {
   const currentUser = getStoredUser();
   const myId = currentUser?.id || currentUser?._id || '';
@@ -21,21 +19,19 @@ function VitalsStation() {
   const [loadingQueue, setLoadingQueue] = useState(true);
   const [queueError, setQueueError] = useState(null);
 
-  // activeSession: the session whose form is currently open (we hold the claim)
   const [activeSession, setActiveSession] = useState(null);
-  // Form field values
+
   const [formValues, setFormValues] = useState({
     temperature: '', bp_systolic: '', bp_diastolic: '',
     pulse: '', spo2: '', weight: '',
   });
   const [formError, setFormError] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [isClaiming, setIsClaiming] = useState(null); // sessionId being claimed
+  const [isClaiming, setIsClaiming] = useState(null);
 
   const pollRef = useRef(null);
   const mountedRef = useRef(true);
 
-  // ── Fetch queue ────────────────────────────────────────────────────────────
   const fetchQueue = useCallback(async () => {
     try {
       const data = await api.getVitalsQueue();
@@ -50,7 +46,6 @@ function VitalsStation() {
     }
   }, []);
 
-  // ── 3-second polling — mirrors the KioskFlow.jsx QR upload polling pattern ─
   useEffect(() => {
     mountedRef.current = true;
     fetchQueue();
@@ -61,7 +56,6 @@ function VitalsStation() {
     };
   }, [fetchQueue]);
 
-  // ── Open vitals form: claim first, then open ───────────────────────────────
   const handleTakeVitals = async (session) => {
     setIsClaiming(session.id);
     setFormError(null);
@@ -70,7 +64,7 @@ function VitalsStation() {
       setActiveSession(session);
       setFormValues({ temperature: '', bp_systolic: '', bp_diastolic: '', pulse: '', spo2: '', weight: '' });
       setFormError(null);
-      // Immediate re-fetch so other stations see the lock right away
+
       fetchQueue();
     } catch (err) {
       if (err.status === 409) {
@@ -84,32 +78,28 @@ function VitalsStation() {
     }
   };
 
-  // ── Resume: reopen form for a session we already claimed ───────────────────
   const handleResume = (session) => {
     setActiveSession(session);
     setFormValues({ temperature: '', bp_systolic: '', bp_diastolic: '', pulse: '', spo2: '', weight: '' });
     setFormError(null);
   };
 
-  // ── Cancel form: release claim ─────────────────────────────────────────────
   const handleCancel = async () => {
     if (!activeSession) return;
     try {
       await api.releaseVitals(activeSession.id);
-    } catch (_) { /* best-effort */ }
+    } catch (_) {  }
     setActiveSession(null);
     setFormError(null);
     fetchQueue();
   };
 
-  // ── Save vitals ────────────────────────────────────────────────────────────
   const handleSave = async (e) => {
     e.preventDefault();
     if (!activeSession) return;
     setIsSaving(true);
     setFormError(null);
 
-    // Parse + validate
     const parse = (v) => (v === '' ? null : parseFloat(v));
     const temp = parse(formValues.temperature);
     const sysBP = parse(formValues.bp_systolic);
@@ -163,7 +153,7 @@ function VitalsStation() {
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
-      {/* ── Queue panel ─────────────────────────────────────────────────── */}
+      {}
       <div className="xl:col-span-2 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
         <div className="p-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
           <div>
@@ -232,7 +222,7 @@ function VitalsStation() {
                     <p className="text-xs text-gray-400 mt-0.5">{fmtTime(s.submitted_at)}</p>
                   </div>
 
-                  {/* Action button area */}
+                  {}
                   <div className="shrink-0">
                     {isInProgressByMe && !isActive && (
                       <button
@@ -262,7 +252,7 @@ function VitalsStation() {
                   </div>
                 </div>
 
-                {/* Lock banner when in-progress by someone else */}
+                {}
                 {isInProgressByOther && (
                   <div className="mt-2 flex items-center gap-1.5 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5">
                     <Lock className="w-3 h-3 shrink-0" />
@@ -273,7 +263,7 @@ function VitalsStation() {
             );
           })}
 
-          {/* Claim/409 error banner below the list */}
+          {}
           {formError && !activeSession && (
             <div className="flex items-start gap-2 text-amber-700 text-xs p-3 bg-amber-50 rounded-lg border border-amber-200 mt-2">
               <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
@@ -283,7 +273,7 @@ function VitalsStation() {
         </div>
       </div>
 
-      {/* ── Vitals form panel ────────────────────────────────────────────── */}
+      {}
       <div className="xl:col-span-3">
         {!activeSession ? (
           <div className="h-full bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col items-center justify-center py-16 text-gray-400">
@@ -293,7 +283,7 @@ function VitalsStation() {
           </div>
         ) : (
           <div className="bg-white rounded-xl border border-brand-300 shadow-md overflow-hidden">
-            {/* Form header */}
+            {}
             <div className="px-5 py-4 bg-brand-900 text-white flex items-center justify-between">
               <div>
                 <h2 className="font-bold text-base">
@@ -310,7 +300,7 @@ function VitalsStation() {
             </div>
 
             <form onSubmit={handleSave} className="p-5 space-y-5">
-              {/* Row 1: Temperature + BP */}
+              {}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className={labelCls}>🌡️ Temperature (°F)</label>
@@ -352,7 +342,7 @@ function VitalsStation() {
                 </div>
               </div>
 
-              {/* Row 2: Pulse + SpO2 + Weight */}
+              {}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className={labelCls}>❤️ Pulse (bpm)</label>
@@ -393,7 +383,7 @@ function VitalsStation() {
                 </div>
               </div>
 
-              {/* Error */}
+              {}
               {formError && (
                 <div className="flex items-start gap-2 text-red-700 text-sm p-3 bg-red-50 rounded-lg border border-red-200">
                   <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -401,7 +391,7 @@ function VitalsStation() {
                 </div>
               )}
 
-              {/* Actions */}
+              {}
               <div className="flex gap-3 pt-1">
                 <button
                   type="submit"
@@ -427,20 +417,17 @@ function VitalsStation() {
   );
 }
 
-// ─── Main Receptionist Dashboard ──────────────────────────────────────────────
 export default function ReceptionistDashboard() {
   const navigate = useNavigate();
   const { patients, doctors, queue, addPatient, forwardToDoctor, logout } = useGlobal();
-  const [activeTab, setActiveTab] = useState('queue'); // 'queue', 'vitals', 'add'
+  const [activeTab, setActiveTab] = useState('queue');
 
-  // Add Patient States
-  const [step, setStep] = useState(1); // 1: Phone, 2: OTP, 3: Details
+  const [step, setStep] = useState(1);
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [patientDetails, setPatientDetails] = useState({ name: '', age: '', gender: 'Male', address: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Forwarding State mapping patient id to selected doctor
   const [selectedDocs, setSelectedDocs] = useState({});
 
   const handleSendOtp = async (e) => {
@@ -501,7 +488,7 @@ export default function ReceptionistDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
-      {/* Sidebar / Mobile Navigation Header */}
+      {}
       <div className="w-full md:w-64 bg-brand-900 text-white flex flex-col shrink-0">
         <div className="p-4 sm:p-6 flex items-center justify-between border-b border-brand-800">
           <div className="flex items-center">
@@ -530,13 +517,13 @@ export default function ReceptionistDashboard() {
         </div>
       </div>
 
-      {/* Main Content */}
+      {}
       <div className="flex-1 p-4 sm:p-8 overflow-y-auto">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">Patient Management</h1>
 
         {activeTab === 'queue' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Registered Patients List */}
+            {}
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
               <div className="p-4 border-b border-gray-200 bg-gray-50/50 font-semibold text-gray-800 flex justify-between items-center">
                 <span>Registered Patients Directory</span>
@@ -573,7 +560,7 @@ export default function ReceptionistDashboard() {
               </div>
             </div>
 
-            {/* Live Queue */}
+            {}
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
               <div className="p-4 border-b border-gray-200 bg-gray-50/50 font-semibold text-gray-800 flex justify-between items-center">
                 <span>Live Doctor Queues</span>
@@ -608,7 +595,7 @@ export default function ReceptionistDashboard() {
           <div className="max-w-xl mx-auto bg-white rounded-xl border border-gray-200 shadow-sm p-8">
             <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">New Patient Registration</h2>
 
-            {/* Steps indicator */}
+            {}
             <div className="flex justify-between items-center mb-8 px-4 relative">
               <div className="absolute left-8 right-8 top-1/2 h-0.5 bg-gray-200 -z-10"></div>
               {[1, 2, 3].map(i => (
@@ -674,4 +661,3 @@ export default function ReceptionistDashboard() {
     </div>
   );
 }
-

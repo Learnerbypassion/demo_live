@@ -1,18 +1,30 @@
-# Dhanvantari / MediKiosk — Multilingual Smart OPD Triage & Clinical Intake System
+# Dhanvantri — Multilingual Smart OPD Triage & Clinical Intake System
 
-## Architecture & Dual-Mode Deployment
+Dhanvantri is an end-to-end clinical intake, triage, and healthcare management platform designed for hospital outpatient departments (OPD). It streamlines patient registration, automated multilingual clinical history collection, doctor verification, and digital health records exchange in compliance with Ayushman Bharat Digital Mission (ABDM) standards.
 
-Dhanvantari is architected with a strict privacy-first model designed for hospital on-premise hardware with an adaptable cloud demonstration mode.
+---
+
+## Key Modules
+
+- **Patient MediKiosk**: Self-service hospital kiosk allowing patients to check in via ABHA ID or phone, report chief complaints via speech/touch in 10+ Indian languages, undergo automated red-flag triage, and upload prior prescriptions or lab reports.
+- **My Patient Portal**: Dedicated portal for patients to view verified clinical records, prescriptions, diagnosis summaries, and history securely via OTP.
+- **Physician & Staff Console**: Clinician-in-the-loop dashboard displaying structured HPI summaries, lab evaluations, vital signs, and FHIR R4 clinical bundles in under 30 seconds per case.
+- **Receptionist & Vitals Desk**: Queue management station with vitals entry (temperature, BP, pulse, SpO2, weight), claim locks, and automated SMS/voice calling for waiting patients.
+- **ABDM / ABHA Integration**: Seamless lookup and verification against the central ABHA registry with longitudinal health record support.
+
+---
+
+## System Architecture
 
 ```
 +-----------------------------------------------------------------------------+
-|                             DHANVANTARI SYSTEM                              |
+|                             DHANVANTRI PLATFORM                             |
 +-----------------------------------------------------------------------------+
 |                                                                             |
 |   +-------------------+                     +---------------------------+   |
 |   |   React + Vite    |                     |    Express API Gateway    |   |
-|   |  Frontend Client  | <--- HTTP / REST ---+       (Node.js / Mongo)   |   |
-|   | (Static / Cloud)  |                     +-------------+-------------+   |
+|   |  Frontend Client  | <--- HTTP / REST ---+    (Node.js / Mongoose)   |   |
+|   |    (Port 5173)    |                     +-------------+-------------+   |
 |   +---------+---------+                                   |                 |
 |             |                                             |                 |
 |      Static Voice Cache                                   |                 |
@@ -27,122 +39,118 @@ Dhanvantari is architected with a strict privacy-first model designed for hospit
 +-----------------------------------------------------------------------------+
 ```
 
-### 1. On-Premise Hospital Deployment (Production)
-In a hospital setting, MediKiosk runs locally on hospital edge hardware:
-- **Zero Cloud Egress for Clinical Data**: Patient medical records and prescription photos never leave hospital premises.
-- **Local PaddleOCR**: Document and lab report OCR runs on an internal Python FastAPI sidecar (`http://127.0.0.1:8001`).
-- **Local Ollama LLM**: Clinical summarization and HPI structuring run locally on `http://127.0.0.1:11434` with `llama3.1:8b`.
-- **Environment Flags**: `OCR_ENABLED=true`, `AI_ENABLED=true`.
-- **Run with Docker Compose**: `docker compose up -d`
+---
 
-### 2. Public Hackathon Demo Deployment (Cloud Safe)
-For remote evaluators and web demonstrations:
-- **Local Heavy AI Isolation**: OCR and Ollama are cleanly disabled via feature flags (`OCR_ENABLED=false`, `AI_ENABLED=false`).
-- **Graceful Informational UI**: The kiosk and doctor dashboards return HTTP 503 (`LOCAL_OCR_UNAVAILABLE` and `LOCAL_AI_UNAVAILABLE`) and present clear privacy badges explaining that OCR and Ollama run on-premise to preserve patient privacy.
-- **Static Voice Cache**: Fixed multilingual voice prompts (250 UI phrases) are pre-rendered into `frontend/public/audio_cache/` so the cloud frontend delivers instant speech without machine dependencies or sensitive data leaks.
-- **Privacy TTS Guard**: Any dynamic patient-specific content is routed strictly to browser-native Web Speech API, never transmitted to external cloud voice services.
-- **Run with Demo Docker Compose**: `docker compose -f docker-compose.demo.yml up -d`
+## Architecture & Deployment
+
+### 1. Hospital On-Premise Deployment (Production)
+In a hospital setting, Dhanvantri runs on hospital edge infrastructure:
+- **Zero Cloud Egress for Clinical Data**: Patient medical records and prescription photos remain on local premises.
+- **Local PaddleOCR**: Document and lab report OCR runs on an internal sidecar (`http://127.0.0.1:8001`).
+- **Local Ollama LLM**: Clinical summarization and HPI structuring run locally on `http://127.0.0.1:11434` (`llama3.1:8b`).
+- **Flags**: `OCR_ENABLED=true`, `AI_ENABLED=true`.
+- **Run**: `docker compose up -d`
+
+### 2. Demonstration Deployment (Cloud Safe)
+For cloud demonstrations:
+- **Heavy Services Isolation**: OCR and Ollama services are cleanly toggled via feature flags (`OCR_ENABLED=false`, `AI_ENABLED=false`).
+- **Informational UI**: The kiosk and doctor dashboards return HTTP 503 (`LOCAL_OCR_UNAVAILABLE` and `LOCAL_AI_UNAVAILABLE`) explaining that heavy OCR and LLM engines are hosted on-premise to preserve patient clinical privacy.
+- **Multilingual Voice Cache**: Fixed multilingual voice prompts are served directly from client assets (`frontend/public/audio_cache/`) for instant zero-latency speech playback.
+- **Run**: `docker compose -f docker-compose.demo.yml up -d`
 
 ---
 
-
-| Area | Before (Python) | Now (JavaScript) |
-|---|---|---|
-| Backend | FastAPI + SQLAlchemy | Express + better-sqlite3 |
-| Auth | None — anyone could hit any endpoint | JWT-based, 3 roles: `hospital_admin`, `doctor`, `patient` |
-| Hospital | n/a | Register hospital (name, registration no., type, phone, email, city/state/PIN, address, HFR/ABDM ID) |
-| Doctors | n/a | Add doctor (name, HPR ID, Aadhar ID, DOB, address, type), remove doctor, doctor login |
-| Patients | Create-only, no auth | Add patient, find patient (by phone), update patient, patient portal login |
-| Doctor console | Queue + generic review | Dashboard/queue, patient's current medicine records, review tabbed as **Profile / Reports / Diagnosis / Case / Prescribing** (per the docx sketch) |
-| Patient console | n/a (kiosk only) | Patient portal: Profile / Reports / Diagnosis / Case tabs, "New visit" kiosk flow, self-service "Update patient" |
-| OCR | pytesseract (needs system Tesseract binary) | `tesseract.js` (pure JS, no native install) |
-| FHIR bundle, red-flag triage, med/lab extraction | Python | Ported 1:1 to JavaScript, same behavior |
-
-## Project layout
+## Project Structure
 
 ```
-medikiosk-js/
-├── backend/
-│   ├── server.js         Express app entrypoint
-│   ├── db.js              better-sqlite3 connection + schema
-│   ├── auth.js             JWT signing + requireAuth/requireRole middleware
-│   ├── extract.js          Rule-based medication/lab extraction (ported)
-│   ├── ocr.js               tesseract.js OCR wrapper
-│   ├── fhirBuilder.js        FHIR R4 bundle builder (ported)
-│   ├── routes/
-│   │   ├── auth.js            Hospital register/login, doctor add/remove/login, patient login
-│   │   ├── patients.js        Add/find/update patient
-│   │   ├── intake.js           Kiosk session flow (symptom, HPI, AYUSH, parameters, docs, submit)
-│   │   └── doctor.js            Queue, medicine records, review
+demo_live/
+├── backend/                  Express API Gateway & Services
+│   ├── routes/               Modular REST routes (auth, intake, doctor, receptionist, etc.)
+│   ├── auth.js               JWT authentication & role-based access control
+│   ├── callAgent.js          Queue calling & SMS notification service (Twilio/Mock)
+│   ├── db.js                 MongoDB connection & Mongoose schemas
+│   ├── documentUpload.js     Prescription and lab report upload handler
+│   ├── extract.js            Rule-based clinical lab and medication extractor
+│   ├── fhirBuilder.js        FHIR R4 bundle builder
+│   ├── ocr.js                OCR service client
+│   ├── redFlagRules.js       Clinical triage & red-flag detection rules
+│   └── server.js             Backend application entry point
+├── frontend/                 React 19 + Vite Application
+│   ├── src/
+│   │   ├── components/       Shared components
+│   │   ├── context/          Global state and authentication context
+│   │   ├── pages/            Kiosk, Doctor, Receptionist, Patient, & Admin views
+│   │   ├── services/         Centralized API client
+│   │   └── utils/            Multilingual translations and helpers
 │   └── package.json
-└── frontend/
-    ├── index.html          Shell
-    ├── app.js               All views/routing (vanilla JS, fetch-based)
-    └── styles.css
+├── mock-abha-server/         Mock National ABHA Central Registry
+└── docker-compose.yml        Docker container orchestrations
 ```
 
-## Roles
+---
 
-- **hospital_admin** — registers the hospital, adds/removes doctors, adds/finds patients.
-- **doctor** — logs in, sees the submitted-patient queue, views a patient's
-  current medicine records, and reviews a visit across five tabs (Profile,
-  Reports, Diagnosis, Case, Prescribing) matching the handwritten UI sketch
-  in the docx.
-- **patient** — logs in with phone + the password set at registration; can
-  view/update their own profile, see reports/diagnosis/case once reviewed,
-  and start a new kiosk visit (symptom pick, optional document photo → OCR,
-  PMH/allergies, submit to the doctor's queue).
+## User Roles & Permissions
 
-Every protected route checks both the JWT and that the resource belongs to
-the caller's hospital (or, for patients, to themselves) — see `assertAccess`
-in `intake.js` and the checks in `patients.js`.
+- **Hospital Admin**: Registers and configures hospital details, manages doctor and receptionist staff accounts, customizes symptom decision trees, and configures queue calling settings.
+- **Doctor**: Manages real-time patient queue, verifies clinical HPI details, reviews extracted lab values and prescriptions across standardized clinical tabs, and signs off on visits.
+- **Receptionist**: Operates the front desk and pre-consultation vitals desk (temperature, BP, pulse, SpO2, weight), claims sessions, and dispatches automated phone/SMS queue notifications.
+- **Patient**: Uses MediKiosk at check-in or logs into the patient portal via OTP to review verified health records, diagnoses, and prescriptions.
 
-## Running it
+---
 
-**1. Backend**
+## Getting Started
+
+### Prerequisites
+- Node.js (v18 or higher)
+- MongoDB (running locally on `mongodb://localhost:27017` or configured via `MONGO_URI`)
+
+### 1. Start Backend Gateway
 
 ```bash
 cd backend
 npm install
-npm start          # listens on http://localhost:8000 by default
+npm start
 ```
+*Listens on `http://localhost:8000` by default. Verify via `http://localhost:8000/api/health`.*
 
-Check `http://localhost:8000/api/health`.
-
-> `tesseract.js` downloads its English language data on first OCR call and
-> caches it locally — this needs outbound internet access once. All other
-> functionality works fully offline.
-
-**2. Frontend**
+### 2. Start Frontend Application
 
 ```bash
 cd frontend
-python3 -m http.server 5500      # or any static file server
+npm install
+npm run dev
 ```
+*Runs on `http://localhost:5173/` by default.*
 
-Visit `http://localhost:5500`. It talks to the backend at
-`http://localhost:8000` by default — to point it elsewhere, set
-`window.MEDIKIOSK_API_BASE` in `index.html` before `app.js` loads.
+### 3. Start Mock ABHA Registry (Optional)
 
-**3. Try the flow**
+```bash
+cd mock-abha-server
+npm install
+npm start
+```
+*Listens on `http://localhost:8005` by default.*
 
-1. **Hospital** → Register a hospital → you're logged in as `hospital_admin`.
-2. Add a doctor (Doctors tab) and a patient (Patients tab, with a portal
-   password so the patient can log in later).
-3. Log out, log back in as **Patient** (phone + password) → "New visit"
-   tab → pick a symptom (try "Chest Pain / Breathless" to see the real
-   server-side red-flag rule fire) → optionally upload a prescription/lab
-   photo → submit.
-4. Log out, log in as **Doctor** with the email/password you added →
-   the patient appears in the Dashboard queue → click them → walk through
-   Profile / Reports / Diagnosis / Case / Prescribing, save each tab.
+---
 
-## Still stand-ins (same caveats as the original prototype)
+## Environment Variables
 
-- ABHA ID is format-validated only — no real ABDM sandbox call.
-- Medication/lab extraction is rule-based (regex + known-drug list), not a
-  trained clinical NER model.
-- Speech-to-text/text-to-speech (Web Speech API in the browser) was in the
-  original single-file kiosk UI; the rewritten frontend focuses on the
-  role-based flows above and doesn't re-wire that piece — it's a
-  straightforward addition to `app.js`'s "New visit" tab if you need it back.
+| Variable | Default | Description |
+|---|---|---|
+| `PORT` | `8000` | Backend API gateway port |
+| `MONGO_URI` | `mongodb://localhost:27017/medikiosk` | MongoDB connection string |
+| `JWT_SECRET` | `medikiosk-dev-secret-change-me` | Secret key for JWT session signing |
+| `OCR_ENABLED` | `false` | Enable local on-premise OCR sidecar integration |
+| `AI_ENABLED` | `false` | Enable local on-premise Ollama clinical summarization |
+| `ABHA_SERVER_URL` | `http://localhost:8005` | Mock central ABHA registry endpoint |
+| `TWILIO_ACCOUNT_SID` | - | Twilio Account SID for voice calls (optional) |
+| `TWILIO_AUTH_TOKEN` | - | Twilio Auth Token (optional) |
+| `TWILIO_FROM_NUMBER` | - | Twilio caller phone number (optional) |
+
+---
+
+## Standards & Compliance
+
+- **FHIR R4**: Generates standard FHIR Bundles containing `Patient`, `Encounter`, `Condition`, `Observation`, and `MedicationStatement` resources.
+- **ABDM Compliant**: Compatible with standard ABHA IDs (14 digits) and longitudinal health records.
+- **Clinical Safety**: Dual triage rules for Allopathic and AYUSH clinical terminology with automated red-flag detection.

@@ -1,13 +1,3 @@
-/**
- * MediKiosk -- OTP Service
- *
- * Uses Twilio Verify when TWILIO_ACCOUNT_SID + TWILIO_AUTH_TOKEN + TWILIO_VERIFY_SID
- * are configured. Falls back to demo in-memory OTP otherwise.
- *
- * Call printStartupWarning() from server.js so the demo-mode warning
- * is always visible on startup -- prevents silent production accidents.
- */
-
 const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
 const TWILIO_AUTH_TOKEN   = process.env.TWILIO_AUTH_TOKEN;
 const TWILIO_VERIFY_SID   = process.env.TWILIO_VERIFY_SID;
@@ -18,8 +8,8 @@ const TWILIO_ENABLED =
   TWILIO_VERIFY_SID  &&
   TWILIO_ACCOUNT_SID !== "your_twilio_account_sid";
 
-const demoOtpStore = new Map();   // { phone -> { otp, expiresAt } }
-const DEMO_OTP = "123456";        // Fixed demo OTP
+const demoOtpStore = new Map();
+const DEMO_OTP = "123456";
 
 let twilioClient = null;
 if (TWILIO_ENABLED) {
@@ -53,7 +43,7 @@ async function sendOtp(phone) {
   if (!isDemoAllowed) {
     throw new Error("SMS verification service is not configured and DEMO_MODE is disabled.");
   }
-  // Demo mode: store and log (masked phone)
+
   demoOtpStore.set(phone, { otp: DEMO_OTP, expiresAt: Date.now() + 10 * 60 * 1000 });
   const masked = phone.length > 4 ? phone.slice(0,-4).replace(/./g,"*") + phone.slice(-4) : phone;
   console.log(`[otpService][DEMO] OTP for ${masked}: ${DEMO_OTP}`);
@@ -67,7 +57,7 @@ async function verifyOtp(phone, otp) {
       .verificationChecks.create({ to: phone, code: otp });
     return check.status === "approved";
   }
-  // Demo mode
+
   const isDemoAllowed = process.env.DEMO_MODE === "true" || process.env.NODE_ENV !== "production";
   if (isDemoAllowed && otp === DEMO_OTP) return true;
   const stored = demoOtpStore.get(phone);

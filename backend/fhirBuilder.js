@@ -1,9 +1,3 @@
-/**
- * MediKiosk — Module D: builds a structurally valid FHIR R4 Bundle
- * (Patient, Encounter, Condition, Observation, MedicationStatement,
- * AllergyIntolerance) from a completed intake session. Ported 1:1 from the
- * Python fhir_builder.py.
- */
 function now() {
   return new Date().toISOString();
 }

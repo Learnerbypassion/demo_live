@@ -5,7 +5,6 @@ import { useGlobal } from '../context/GlobalContext';
 import { api } from '../services/api';
 import RepoButton from '../components/RepoButton';
 
-
 function FormattedAiSummary({ text }) {
   if (!text) return null;
 
@@ -68,7 +67,7 @@ function FormattedAiSummary({ text }) {
 
   return (
     <div className="space-y-3.5 text-sm font-sans pt-1">
-      {/* Chief Complaint */}
+      {}
       {chiefComplaint && (
         <div className="bg-blue-50/80 border border-blue-200/80 rounded-xl p-3.5 flex items-start space-x-3 shadow-2xs">
           <div className="p-2 bg-blue-100 text-blue-700 rounded-lg shrink-0 mt-0.5">
@@ -81,7 +80,7 @@ function FormattedAiSummary({ text }) {
         </div>
       )}
 
-      {/* Key History Bullets */}
+      {}
       {keyHistory && (
         <div className="bg-white border border-gray-200/80 rounded-xl p-3.5 shadow-2xs">
           <h4 className="text-[11px] font-bold tracking-wider uppercase text-gray-500 mb-2 flex items-center">
@@ -101,7 +100,7 @@ function FormattedAiSummary({ text }) {
         </div>
       )}
 
-      {/* Triage / Red Flags */}
+      {}
       {redFlags && (
         <div className={`rounded-xl p-3 border flex items-center space-x-3 ${isSafeTriage ? 'bg-green-50/80 border-green-200 text-green-900' : 'bg-red-50 border-red-300 text-red-900'}`}>
           <div className={`p-1.5 rounded-lg shrink-0 ${isSafeTriage ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
@@ -114,15 +113,15 @@ function FormattedAiSummary({ text }) {
         </div>
       )}
 
-      {/* Uploaded Document / Lab Findings (Key-Value Table Format) */}
+      {}
       {labFindings && (() => {
-        // Parse markdown table if present
+
         const tableLines = labFindings.split('\n').filter(l => l.trim().startsWith('|'));
         let parsedTable = [];
         let nonTableText = [];
 
         if (tableLines.length >= 2) {
-          // Has markdown table
+
           const rawRows = tableLines.filter(l => !/^[\|\-\s:]+$/.test(l.trim()));
           if (rawRows.length > 0) {
             parsedTable = rawRows.slice(1).map(row => {
@@ -137,7 +136,7 @@ function FormattedAiSummary({ text }) {
           }
           nonTableText = labFindings.split('\n').filter(l => !l.trim().startsWith('|') && l.trim().length > 0);
         } else {
-          // Regex extract key-value pairs from prose/paragraph
+
           const extractedRows = [];
           const knownPatterns = [
             { name: 'Serum Urea', regex: /urea[^\d]*(\d+(?:\.\d+)?)\s*(mg\/dl)?(?:[^\d]*reference[^\d]*(\d+(?:\s*-\s*\d+)?))?/i, defaultRef: '19 - 45 mg/dL' },
@@ -193,7 +192,7 @@ function FormattedAiSummary({ text }) {
               </span>
             </div>
 
-            {/* Render Key-Value Table if parameters found */}
+            {}
             {parsedTable.length > 0 && (
               <div className="overflow-x-auto rounded-lg border border-emerald-200/70 bg-white mb-3 shadow-2xs">
                 <table className="w-full text-left text-xs">
@@ -241,7 +240,7 @@ function FormattedAiSummary({ text }) {
               </div>
             )}
 
-            {/* Supporting Clinical Notes from AI */}
+            {}
             {nonTableText.length > 0 && (
               <div className="bg-white/80 p-3 rounded-lg border border-emerald-100 text-xs text-gray-700 leading-relaxed">
                 <span className="font-bold text-emerald-900 block mb-1">Clinical Interpretation:</span>
@@ -254,7 +253,7 @@ function FormattedAiSummary({ text }) {
         );
       })()}
 
-      {/* Extracted Medications */}
+      {}
       {medications && (
         <div className="bg-purple-50/50 border border-purple-200/80 rounded-xl p-3 flex items-start space-x-3">
           <div className="p-1.5 bg-purple-100 text-purple-700 rounded-lg shrink-0 mt-0.5">
@@ -279,7 +278,7 @@ function FormattedAiSummary({ text }) {
         </div>
       )}
 
-      {/* Clinical Assessment & Priority */}
+      {}
       {assessment && (
         <div className="bg-white border border-gray-200 rounded-xl p-3.5 shadow-2xs flex flex-col space-y-2">
           <div className="flex items-center justify-between">
@@ -319,7 +318,6 @@ export default function DoctorDashboard() {
 
   const doctorSpecialty = currentDoctor?.specialization || currentDoctor?.doctor_type || 'Clinical Specialist';
 
-  // Strict client-side queue isolation guarantee
   const myQueue = React.useMemo(() => {
     if (!Array.isArray(queue)) return [];
     const docId = currentDoctor?.id || currentDoctor?._id;
@@ -346,7 +344,7 @@ export default function DoctorDashboard() {
   const [loadingAbha, setLoadingAbha] = useState(false);
   const [syncStatus, setSyncStatus] = useState(null);
   const [selectedCaseModal, setSelectedCaseModal] = useState(null);
-  const [caseModalTab, setCaseModalTab] = useState('overview'); // 'overview' | 'labs' | 'summary' | 'qa' | 'ayush' | 'fhir'
+  const [caseModalTab, setCaseModalTab] = useState('overview');
   const [copiedCaseFhir, setCopiedCaseFhir] = useState(false);
   const [showAllHistory, setShowAllHistory] = useState(false);
   const [notifyingId, setNotifyingId] = useState(null);
@@ -432,7 +430,6 @@ Status: Digitally Signed & Synced to Central ABDM Registry
       const abhaId = qItem.abha_id;
       let records = [];
 
-      // 1. Fetch from Central ABHA if patient has an ABHA ID
       if (abhaId) {
         try {
           const directRes = await api.getAbhaRecordsDirect(abhaId);
@@ -447,7 +444,6 @@ Status: Digitally Signed & Synced to Central ABDM Registry
         }
       }
 
-      // 2. If no direct ABHA records yet, try through backend doctor patient ABHA route
       if (records.length === 0 && pid) {
         try {
           const res = await api.getAbhaHistory(pid);
@@ -462,7 +458,6 @@ Status: Digitally Signed & Synced to Central ABDM Registry
         }
       }
 
-      // 3. Also load local hospital previous sessions for this patient (excluding active session)
       if (pid) {
         try {
           const localSessions = await api.getPatientSessions(pid);
@@ -497,7 +492,6 @@ Status: Digitally Signed & Synced to Central ABDM Registry
         }
       }
 
-      // Sort chronological descending
       records.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
       setAbhaHistory(records);
     } catch (err) {
@@ -534,7 +528,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
       }
       if (Array.isArray(s.documents)) setSessionDocs(s.documents);
       else setSessionDocs([]);
-      // Show AI summary if already generated
+
       if (s.summary) setAiSummary(s.summary);
     } catch (err) {
       console.error('Error fetching session details:', err);
@@ -596,9 +590,8 @@ Status: Digitally Signed & Synced to Central ABDM Registry
     navigate('/');
   };
 
-  // ── UI-only state for queue search & filter (no handler/data changes) ──────
   const [searchQuery, setSearchQuery] = React.useState('');
-  const [queueFilter, setQueueFilter] = React.useState('all'); // 'all' | 'priority'
+  const [queueFilter, setQueueFilter] = React.useState('all');
 
   const filteredQueue = React.useMemo(() => {
     let q = myQueue;
@@ -615,7 +608,6 @@ Status: Digitally Signed & Synced to Central ABDM Registry
     return q;
   }, [myQueue, searchQuery, queueFilter]);
 
-  // Wait-time helper (minutes since submission)
   const waitMinutes = (submittedAt) => {
     if (!submittedAt) return null;
     const mins = Math.floor((Date.now() - new Date(submittedAt)) / 60000);
@@ -627,10 +619,10 @@ Status: Digitally Signed & Synced to Central ABDM Registry
   return (
     <div className="h-screen overflow-hidden flex flex-col" style={{ background: 'var(--color-clinical-canvas, #f8faff)' }}>
 
-      {/* ── Top Navigation Bar ─────────────────────────────────────────────── */}
+      {}
       <header style={{ background: 'var(--color-clinical-navy, #1b3676)' }}
         className="text-white px-3 sm:px-5 py-2 sm:py-2.5 flex items-center justify-between shrink-0 shadow-lg z-10">
-        {/* Left: logo + doctor breadcrumb */}
+        {}
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
           <div className="flex items-center gap-2.5 shrink-0">
             <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="Dhanvantri"
@@ -655,7 +647,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
           </div>
         </div>
 
-        {/* Right: badges + repo link + sign out */}
+        {}
         <div className="flex items-center gap-2 shrink-0">
           <div className="hidden sm:flex items-center gap-1.5 text-xs bg-white/10 border border-white/15 text-white/90 px-3 py-1.5 rounded-full">
             <Sparkles className="w-3.5 h-3.5 text-blue-200" />
@@ -670,13 +662,13 @@ Status: Digitally Signed & Synced to Central ABDM Registry
         </div>
       </header>
 
-      {/* ── Main Layout: Queue | Consultation ─────────────────────────────── */}
+      {}
       <div className="flex flex-1 overflow-hidden">
 
-        {/* ── Left: Patient Queue Panel ───────────────────────────────────── */}
+        {}
         <div className={`w-full md:w-72 xl:w-80 shrink-0 bg-white md:border-r border-slate-200 flex flex-col overflow-hidden shadow-sm ${activeConsultation ? 'hidden md:flex' : 'flex'}`}>
 
-          {/* Panel header with stats */}
+          {}
           <div className="px-4 pt-3.5 pb-3 border-b border-slate-100 bg-slate-50/80">
             <div className="flex items-center justify-between mb-2.5">
               <div>
@@ -690,7 +682,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                 {myQueue.length}
               </span>
             </div>
-            {/* Mini stats strip */}
+            {}
             <div className="grid grid-cols-3 gap-1.5 text-center">
               {[
                 { label: 'Assigned', val: myQueue.length, color: 'text-slate-700' },
@@ -705,7 +697,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
             </div>
           </div>
 
-          {/* Search + filter pills */}
+          {}
           <div className="px-3 py-2.5 border-b border-slate-100 space-y-2">
             <div className="relative">
               <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -741,7 +733,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
             </div>
           </div>
 
-          {/* Queue list */}
+          {}
           <div className="flex-1 overflow-y-auto p-2.5 space-y-2">
             {filteredQueue.length === 0 && (
               <p className="text-slate-400 text-xs text-center py-10">
@@ -769,7 +761,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                   }`}
                   style={isActive ? { background: '#eff6ff' } : hasRedFlag ? { background: '#fff1f2' } : { background: 'white' }}>
 
-                  {/* Red-flag accent strip */}
+                  {}
                   {hasRedFlag && (
                     <div className="h-0.5 w-full bg-rose-500" />
                   )}
@@ -778,7 +770,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                   )}
 
                   <div className="p-3">
-                    {/* Row 1: Token + Name + red flag badge */}
+                    {}
                     <div className="flex items-start justify-between gap-2 mb-1.5">
                       <div className="flex items-center gap-2 min-w-0">
                         <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0"
@@ -796,7 +788,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                       )}
                     </div>
 
-                    {/* Row 2: Age/gender + chief complaint */}
+                    {}
                     {(patient?.age || patient?.gender || q.chief_complaint) && (
                       <div className="space-y-0.5 mb-2">
                         {(patient?.age || patient?.gender) && (
@@ -811,7 +803,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                       </div>
                     )}
 
-                    {/* Vitals chips — only when status === 'recorded' */}
+                    {}
                     {hasVitals && (() => {
                       const v = q.vitals;
                       const chips = [
@@ -832,7 +824,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                       );
                     })()}
 
-                    {/* Row 3: Wait time + notify button */}
+                    {}
                     <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-100">
                       <div className="flex items-center gap-1.5">
                         {isNotified ? (
@@ -865,10 +857,10 @@ Status: Digitally Signed & Synced to Central ABDM Registry
           </div>
         </div>
 
-        {/* ── Right: Consultation Area ─────────────────────────────────────── */}
+        {}
         <div className={`flex-1 flex flex-col overflow-hidden ${!activeConsultation ? 'hidden md:flex' : 'flex'}`}>
           {!activeConsultation ? (
-            /* Empty state */
+
             <div className="flex-1 flex flex-col items-center justify-center text-slate-400 p-10 text-center">
               <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
                 <ClipboardList className="w-8 h-8 text-slate-300" />
@@ -887,7 +879,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
             return (
               <div className="flex flex-col flex-1 overflow-hidden">
 
-                {/* Patient Banner (navy) */}
+                {}
                 <div className="shrink-0 text-white px-3 sm:px-5 py-3 sm:py-3.5 flex items-start sm:items-center justify-between gap-2 sm:gap-4"
                   style={{ background: 'var(--color-clinical-navy, #1b3676)' }}>
                   <div className="min-w-0 flex-1 flex items-start sm:items-center gap-2 sm:gap-3">
@@ -900,7 +892,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                       <span>Queue</span>
                     </button>
                     <div className="min-w-0 flex-1">
-                      {/* Name + badges row */}
+                      {}
                       <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
                         <h2 className="font-bold text-lg sm:text-xl leading-tight truncate">{patient?.name}</h2>
                         {activeConsultation.abha_id && (
@@ -914,7 +906,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                           </span>
                         )}
                       </div>
-                    {/* Demographics row */}
+                    {}
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-blue-200">
                       {patient?.age && <span>{patient.age} yrs</span>}
                       {patient?.gender && <span className="before:content-['•'] before:mr-1.5">{patient.gender}</span>}
@@ -932,7 +924,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                     </div>
                   </div>
                 </div>
-                {/* Banner actions */}
+                {}
                 <div className="flex items-center gap-2 shrink-0">
                     <button onClick={() => setShowFhir(!showFhir)}
                       className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 transition">
@@ -942,18 +934,18 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                   </div>
                 </div>
 
-                {/* Scrollable content area */}
+                {}
                 <div className="flex-1 overflow-y-auto" style={{ background: 'var(--color-clinical-canvas, #f8faff)' }}>
                   <div className="p-3 sm:p-5 max-w-none">
 
-                    {/* FHIR viewer */}
+                    {}
                     {showFhir && (
                       <div className="mb-5 bg-slate-900 text-emerald-400 p-4 rounded-xl font-mono text-xs overflow-x-auto shadow-inner max-h-56">
                         <pre>{JSON.stringify(fhirData, null, 2)}</pre>
                       </div>
                     )}
 
-                    {/* Red-flag alert bar */}
+                    {}
                     {intake.redFlags?.length > 0 && (
                       <div className="mb-5 bg-rose-50 border border-rose-300 rounded-xl p-3.5 flex items-start gap-3 shadow-xs">
                         <div className="p-1.5 bg-rose-100 rounded-lg shrink-0">
@@ -966,13 +958,13 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                       </div>
                     )}
 
-                    {/* Two-column grid: left (AI + HPI + Rx) | right (Vitals + ABHA + Docs) */}
+                    {}
                     <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
 
-                      {/* ── LEFT COLUMN (wider) ──────────────────────────── */}
+                      {}
                       <div className="xl:col-span-3 space-y-5">
 
-                        {/* AI Clinical Summary — violet accent */}
+                        {}
                         <div className="bg-white rounded-xl border border-violet-200 shadow-xs overflow-hidden">
                           <div className="flex items-center justify-between px-4 py-3 border-b border-violet-100"
                             style={{ background: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)' }}>
@@ -1036,7 +1028,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                           </div>
                         </div>
 
-                        {/* HPI + Chief Complaints editable card */}
+                        {}
                         <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
                           <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/60">
                             <div className="flex items-center gap-2">
@@ -1069,7 +1061,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                           </div>
                         </div>
 
-                        {/* AYUSH card */}
+                        {}
                         {intake.mode === 'AYUSH' && (
                           <div className="bg-white rounded-xl border border-emerald-200 shadow-xs overflow-hidden">
                             <div className="px-4 py-3 border-b border-emerald-100 bg-emerald-50/40">
@@ -1090,7 +1082,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                           </div>
                         )}
 
-                        {/* Clinical Notes & Prescription editor */}
+                        {}
                         <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
                           <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/60">
                             <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
@@ -1108,12 +1100,12 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                           </div>
                         </div>
 
-                      </div>{/* end LEFT column */}
+                      </div>{}
 
-                      {/* ── RIGHT COLUMN (narrower) ──────────────────────── */}
+                      {}
                       <div className="xl:col-span-2 space-y-5">
 
-                        {/* Pre-consultation Vitals — only when vitals_status === 'recorded' */}
+                        {}
                         {activeConsultation.vitals_status === 'recorded' && activeConsultation.vitals && (() => {
                           const v = activeConsultation.vitals;
                           const metrics = [
@@ -1162,7 +1154,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                           );
                         })()}
 
-                        {/* Documents */}
+                        {}
                         {docsToShow?.length > 0 && (
                           <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
                             <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/60">
@@ -1213,7 +1205,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                           </div>
                         )}
 
-                        {/* ABHA Medical History */}
+                        {}
                         <div className="bg-white rounded-xl border border-blue-200 shadow-xs overflow-hidden">
                           <div className="flex items-center justify-between px-4 py-3 border-b border-blue-100 bg-blue-50/40">
                             <div className="flex items-center gap-2">
@@ -1291,7 +1283,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                                 )}
                               </div>
                             ) : (
-                              /* Clear empty state — not a failure/missing-data appearance */
+
                               <div className="py-4 px-3 bg-slate-50 rounded-lg text-center">
                                 <p className="text-xs font-medium text-slate-500">No previous records found</p>
                                 <p className="text-[10px] text-slate-400 mt-0.5">
@@ -1304,12 +1296,12 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                           </div>
                         </div>
 
-                      </div>{/* end RIGHT column */}
-                    </div>{/* end two-column grid */}
-                  </div>{/* end p-5 content wrapper */}
-                </div>{/* end scrollable area */}
+                      </div>{}
+                    </div>{}
+                  </div>{}
+                </div>{}
 
-                {/* Footer actions */}
+                {}
                 <div className="shrink-0 px-5 py-3 bg-white border-t border-slate-200 flex items-center justify-between gap-4">
                   <div>
                     {syncStatus?.synced && (
@@ -1337,14 +1329,14 @@ Status: Digitally Signed & Synced to Central ABDM Registry
               </div>
             );
           })()}
-        </div>{/* end right panel */}
-      </div>{/* end main layout */}
-      {/* ================= MODAL: PREVIOUS CASE IN-DEPTH INSPECTION ================= */}
+        </div>{}
+      </div>{}
+      {}
       {selectedCaseModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 animate-fade-in">
           <div className="bg-white rounded-3xl max-w-4xl w-full p-6 shadow-2xl border border-gray-200 flex flex-col max-h-[92vh] overflow-hidden">
-            
-            {/* Modal Header */}
+
+            {}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-gray-100 gap-3">
               <div>
                 <div className="flex items-center space-x-2">
@@ -1395,7 +1387,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
               </div>
             </div>
 
-            {/* Modal Navigation Tabs */}
+            {}
             <div className="flex items-center space-x-2 border-b border-gray-200 pt-3 overflow-x-auto shrink-0">
               <button
                 onClick={() => setCaseModalTab('overview')}
@@ -1471,10 +1463,10 @@ Status: Digitally Signed & Synced to Central ABDM Registry
               </button>
             </div>
 
-            {/* Modal Body Content */}
+            {}
             <div className="flex-1 overflow-y-auto py-4 space-y-4 pr-1">
-              
-              {/* TAB 1: OVERVIEW & RX */}
+
+              {}
               {caseModalTab === 'overview' && (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1493,7 +1485,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                     </div>
                   </div>
 
-                  {/* Prescription Card */}
+                  {}
                   <div className="bg-emerald-50/60 p-4 rounded-2xl border border-emerald-200 space-y-2">
                     <span className="text-xs font-bold uppercase tracking-wider text-emerald-900 flex items-center">
                       <Pill className="w-4 h-4 mr-1.5 text-emerald-700" /> Prescribed Medications &amp; Clinical Advice
@@ -1503,7 +1495,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                     </div>
                   </div>
 
-                  {/* Quick Labs Preview */}
+                  {}
                   {selectedCaseModal.lab_reports && selectedCaseModal.lab_reports.some(lr => lr.labs && lr.labs.length > 0) && (
                     <div className="bg-purple-50/50 p-4 rounded-2xl border border-purple-200 space-y-2">
                       <div className="flex items-center justify-between">
@@ -1530,7 +1522,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                 </div>
               )}
 
-              {/* TAB 2: DIAGNOSTIC LAB PANEL */}
+              {}
               {caseModalTab === 'labs' && (
                 <div className="space-y-3">
                   <div className="bg-purple-50 p-3.5 rounded-xl border border-purple-200 flex items-center justify-between">
@@ -1590,7 +1582,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                 </div>
               )}
 
-              {/* TAB 3: AI CLINICAL SUMMARY */}
+              {}
               {caseModalTab === 'summary' && (
                 <div className="space-y-3">
                   <div className="bg-blue-50 p-3.5 rounded-xl border border-blue-200 flex items-center justify-between">
@@ -1614,7 +1606,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                 </div>
               )}
 
-              {/* TAB 4: KIOSK Q&A & TRANSCRIPT */}
+              {}
               {caseModalTab === 'qa' && (
                 <div className="space-y-3">
                   <div className="bg-slate-100 p-3.5 rounded-xl border border-slate-200 flex items-center justify-between">
@@ -1635,7 +1627,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                 </div>
               )}
 
-              {/* TAB 5: AYUSH FINDINGS */}
+              {}
               {caseModalTab === 'ayush' && selectedCaseModal.ayush_fields && (
                 <div className="space-y-3">
                   <div className="bg-emerald-50 p-3.5 rounded-xl border border-emerald-200">
@@ -1654,7 +1646,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
                 </div>
               )}
 
-              {/* TAB 6: FHIR R4 INSPECTION */}
+              {}
               {caseModalTab === 'fhir' && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between bg-gray-900 text-white p-3 rounded-xl">
@@ -1695,7 +1687,7 @@ Status: Digitally Signed & Synced to Central ABDM Registry
               )}
             </div>
 
-            {/* Modal Footer */}
+            {}
             <div className="pt-3 border-t border-gray-100 flex justify-end">
               <button
                 onClick={() => setSelectedCaseModal(null)}

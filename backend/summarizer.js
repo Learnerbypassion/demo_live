@@ -1,12 +1,3 @@
-/**
- * MediKiosk -- AI Clinical Summary Generator
- *
- * Tries local Ollama (OLLAMA_URL env, default http://localhost:11434).
- * On any error (service down, timeout, bad model), returns null.
- * Never throws -- submission flow is never blocked by LLM availability.
- *
- * Only structured fields sent to LLM. Raw OCR text is NOT included.
- */
 const axios = require("axios");
 
 const OLLAMA_URL   = process.env.OLLAMA_URL   || "http://localhost:11434";
@@ -37,7 +28,6 @@ function buildPrompt(session, docs) {
     .map(l => `  - ${l.name}: ${l.value} ${l.unit} (ref ${l.ref_range})${l.abnormal ? " ABNORMAL" : ""}`)
     .join("\n") || "  None extracted";
 
-  // Raw OCR text from uploaded prescriptions / lab reports
   const ocrBlock = (docs || [])
     .map((d, i) => {
       const txt = d.raw_ocr_text || d.raw_text || "";
@@ -115,10 +105,6 @@ async function generateSummary(session, docs) {
   }
 }
 
-
-// -----------------------------------------------------------------------
-// AI-driven HPI follow-up question generation
-// -----------------------------------------------------------------------
 async function generateHpiQuestions(session, hospitalParams = null) {
   const cc = session.chief_complaint || "General Consultation";
   const transcript = session.transcript || "";
@@ -133,7 +119,7 @@ async function generateHpiQuestions(session, hospitalParams = null) {
     let prompt;
 
     if (hasCustomTree) {
-      // 1. Parameter-driven prompt strictly following hospital decision-tree
+
       const paramList = hospitalParams.map((p, idx) => {
         const optText = Array.isArray(p.options) && p.options.length > 0 ? ` (options: ${p.options.join(', ')})` : '';
         return `${idx + 1}. Parameter: "${p.label}" [Type: ${p.type}${optText}]`;
@@ -157,7 +143,7 @@ Rules:
 - Respond ONLY with a valid JSON array of question strings in English. No markdown, no preamble, just the JSON array.
 Example: ["Question for parameter 1?", "Question for parameter 2?"]`;
     } else {
-      // 2. Standard freeform triage prompt
+
       prompt = `You are an expert Clinical Triage AI at a hospital OPD kiosk.
 The patient has reported the following symptom/condition:
 - Chief Complaint: ${cc}
@@ -194,7 +180,6 @@ Example: ["When did the ear pain start?", "On a scale of 1-10, how severe is the
       }
     }
 
-    // Fallback if LLM output was invalid
     return hasCustomTree ? fallbackFromTree(hospitalParams, cc) : defaultHpiQuestions(cc);
   } catch (err) {
     console.info("[summarizer] HPI questions generation fallback:", err.message?.slice(0, 60));
@@ -222,9 +207,6 @@ function defaultHpiQuestions(cc) {
   ];
 }
 
-// -----------------------------------------------------------------------
-// AI doctor recommendation
-// -----------------------------------------------------------------------
 async function recommendDoctor(session, doctors) {
   if (!doctors || doctors.length === 0) return null;
   if (!AI_ENABLED) {

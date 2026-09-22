@@ -15,7 +15,6 @@ export const GlobalProvider = ({ children }) => {
   const [queue, setQueue] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Normalize patient object so components using abhaId or abha_id work
   const normalizePatient = (p) => ({
     ...p,
     id: p.id,
@@ -24,7 +23,6 @@ export const GlobalProvider = ({ children }) => {
     history: Array.isArray(p.history) ? p.history : [],
   });
 
-  // Normalize doctor object so specialization, education, license, phone work
   const normalizeDoctor = (d) => ({
     ...d,
     id: d.id,
@@ -34,7 +32,6 @@ export const GlobalProvider = ({ children }) => {
     phone: d.phone || '9999999999',
   });
 
-  // Normalize queue item
   const normalizeQueueItem = (q) => {
     let intake = q.intake;
     if (!intake) {
@@ -61,7 +58,6 @@ export const GlobalProvider = ({ children }) => {
     };
   };
 
-  // Refresh all state from backend
   const refreshAll = useCallback(async () => {
     try {
       const authToken = getAuthToken();
@@ -71,32 +67,29 @@ export const GlobalProvider = ({ children }) => {
         return;
       }
 
-      // 1. Fetch Doctors (for hospital staff, admin, and kiosk)
       if (['hospital_admin', 'doctor', 'receptionist', 'kiosk'].includes(role)) {
         try {
           const docs = await api.getDoctors();
           if (Array.isArray(docs)) setDoctors(docs.map(normalizeDoctor));
         } catch (e) {
-          // May not be allowed
+
         }
       }
 
-      // 2. Fetch Receptionists (hospital_admin role only)
       if (role === 'hospital_admin') {
         try {
           const recs = await api.getReceptionists();
           if (Array.isArray(recs)) setReceptionists(recs);
         } catch (e) {
-          // Not admin
+
         }
       }
 
-      // 3. Fetch Patients (hospital staff roles only)
       if (['hospital_admin', 'doctor', 'receptionist'].includes(role)) {
         try {
           const pts = await api.getPatients();
           if (Array.isArray(pts)) {
-            // Also fetch session history for patients
+
             const detailed = await Promise.all(
               pts.map(async (p) => {
                 try {
@@ -121,7 +114,7 @@ export const GlobalProvider = ({ children }) => {
           }
         } catch (e) {}
       } else if (role === 'patient' && stored?.id) {
-        // If patient login, fetch own profile only
+
         try {
           const myP = await api.getPatient(stored.id);
           const sessions = await api.getPatientSessions(stored.id);
@@ -137,12 +130,11 @@ export const GlobalProvider = ({ children }) => {
         }
       }
 
-      // 4. Fetch Queue (Doctor & Hospital Admin only)
       if (['doctor', 'hospital_admin'].includes(role)) {
         try {
           const qList = await api.getDoctorQueue();
           if (Array.isArray(qList)) {
-            // Enrich queue items with session detail
+
             const enriched = await Promise.all(
               qList.map(async (qItem) => {
                 try {
@@ -168,7 +160,7 @@ export const GlobalProvider = ({ children }) => {
             setQueue(enriched);
           }
         } catch (e) {
-          // Not doctor
+
         }
       }
     } catch (err) {
@@ -176,12 +168,10 @@ export const GlobalProvider = ({ children }) => {
     }
   }, []);
 
-  // On mount or token change, load backend data
   useEffect(() => {
     refreshAll();
   }, [refreshAll]);
 
-  // Auth helper
   const handleAuthSuccess = (newToken, newUser) => {
     setAuthToken(newToken);
     setStoredUser(newUser);
@@ -196,7 +186,6 @@ export const GlobalProvider = ({ children }) => {
     setUser(null);
   };
 
-  // Admin Actions
   const addDoctor = async (docData) => {
     try {
       const res = await api.addDoctor(docData);
@@ -241,7 +230,6 @@ export const GlobalProvider = ({ children }) => {
     }
   };
 
-  // Receptionist / Patient Actions
   const addPatient = async (patientData) => {
     try {
       const res = await api.addPatient(patientData);
@@ -262,7 +250,7 @@ export const GlobalProvider = ({ children }) => {
         status: 'submitted',
         chief_complaint: 'Referred from Reception Desk',
       });
-      // Refresh live queue from backend
+
       await refreshAll();
       return res;
     } catch (err) {
@@ -271,10 +259,9 @@ export const GlobalProvider = ({ children }) => {
     }
   };
 
-  // Kiosk Actions
   const submitKioskIntake = async (patientId, doctorId, intakeData) => {
     try {
-      // 1. Create session
+
       const sessionRes = await api.createSession({
         patient_id: patientId,
         doctor_id: doctorId,
@@ -282,7 +269,6 @@ export const GlobalProvider = ({ children }) => {
       });
       const sId = sessionRes.session_id;
 
-      // 2. Update symptom & red flags
       const chiefComplaintText = intakeData.chiefComplaint?.join(', ') || 'General Consultation';
       await api.updateSymptom(sId, {
         symptom_id: intakeData.redFlags?.length ? 'chest' : 'general',
@@ -290,20 +276,16 @@ export const GlobalProvider = ({ children }) => {
         transcript: intakeData.hpi || null,
       });
 
-      // 3. Update HPI
       if (intakeData.hpi) {
         await api.updateHpi(sId, [{ label: 'HPI', value: intakeData.hpi }]);
       }
 
-      // 4. Update AYUSH if applicable
       if (intakeData.mode === 'AYUSH' && intakeData.ayushData) {
         await api.updateAyush(sId, intakeData.ayushData);
       }
 
-      // 5. Submit session (generates FHIR bundle)
       const submitRes = await api.submitSession(sId);
-      
-      // Update queue locally & refresh
+
       await refreshAll();
       return submitRes;
     } catch (err) {
@@ -312,7 +294,6 @@ export const GlobalProvider = ({ children }) => {
     }
   };
 
-  // Doctor Actions
   const completeConsultation = async (queueId, patientId, notes, prescription) => {
     try {
       const reviewRes = await api.reviewSession(queueId, {
@@ -321,10 +302,8 @@ export const GlobalProvider = ({ children }) => {
         prescription: prescription,
       });
 
-      // Remove from queue locally
       setQueue((prev) => prev.filter((q) => q.id !== queueId && q.sessionId !== queueId));
 
-      // Update patient history
       setPatients((prev) =>
         prev.map((p) => {
           if (p.id === patientId) {

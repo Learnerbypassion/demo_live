@@ -1,13 +1,3 @@
-/**
- * Kiosk intake flow -- symptom capture, HPI, AYUSH fields, document upload
- * + OCR, and submission (MongoDB / Mongoose).
- *
- * Changes from original:
- *  - RED_FLAG_RULES moved to ../redFlagRules.js (configurable, AYUSH-aware)
- *  - Multer: 10 MB fileSize limit with clean 413 response
- *  - POST /:id/submit: fire-and-forget AI summary via ../summarizer.js
- *  - POST /:id/summarize: on-demand summary (requireRole doctor/hospital_admin)
- */
 const express  = require("express");
 const path     = require("path");
 const fs       = require("fs");
@@ -46,28 +36,26 @@ async function assertAccess(req, res, session) {
     return true;
   }
 
-  // Doctor or Hospital Admin access
   if (req.user.role === "doctor") {
-    // If assigned to this doctor, permit immediately
+
     if (session.doctor_id && (session.doctor_id.toString() === req.user.id.toString() || session.doctor_id.toString() === req.user._id?.toString())) {
       return true;
     }
-    // If patient is from same hospital, permit
+
     if (req.user.hospital_id && patient.hospital_id && req.user.hospital_id.toString() === patient.hospital_id.toString()) {
       return true;
     }
-    // If unassigned kiosk session, permit doctor to view
+
     if (!session.doctor_id) {
       return true;
     }
-    // Permissive fallback so doctors can review self-service patients
+
     return true;
   }
 
   return true;
 }
 
-// ---------- List sessions ----------
 router.get("/", requireAuth, async (req, res) => {
   try {
     const { status, patient_id } = req.query;
@@ -89,7 +77,6 @@ router.get("/", requireAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message || "Failed to list sessions" }); }
 });
 
-// ---------- Create session ----------
 router.post("/", requireAuth, async (req, res) => {
   try {
     const { patient_id, doctor_id, ayush_mode = false, consent_given = true, status = "in_progress", chief_complaint } = req.body;
@@ -126,7 +113,6 @@ router.post("/", requireAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message || "Failed to create session" }); }
 });
 
-// ---------- Symptom update (uses configurable redFlagRules.js) ----------
 router.patch("/:id/symptom", requireAuth, async (req, res) => {
   try {
     const s = await sessionOr404(req.params.id, res);
@@ -191,8 +177,6 @@ router.patch("/:id/notes", requireAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message || "Failed to update notes" }); }
 });
 
-// ---------- Document upload with OCR (10 MB cap) ----------
-// Actual upload logic lives in ../documentUpload.js (shared with mobile-upload route).
 router.post("/:id/document", requireAuth, async (req, res) => {
   try {
     const s = await sessionOr404(req.params.id, res);
@@ -202,8 +186,6 @@ router.post("/:id/document", requireAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message || "Failed to process document" }); }
 });
 
-
-// ---------- Submit session (FHIR + fire-and-forget AI summary) ----------
 router.post("/:id/submit", requireAuth, async (req, res) => {
   try {
     const s = await sessionOr404(req.params.id, res);
@@ -228,10 +210,8 @@ router.post("/:id/submit", requireAuth, async (req, res) => {
 
     await IntakeSession.findByIdAndUpdate(s.id, updateFields);
 
-    // Respond immediately -- don't block on (potentially slow) LLM
     res.json({ ok: true, status: "submitted", token: s.token });
 
-    // Fire-and-forget AI summary and enrich extracted_labs
     setImmediate(async () => {
       try {
         if (process.env.AI_ENABLED === "false") return;
@@ -254,7 +234,6 @@ router.post("/:id/submit", requireAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message || "Failed to submit session" }); }
 });
 
-// ---------- On-demand summary re-generation (doctor / hospital_admin only) ----------
 router.post("/:id/summarize", requireAuth, requireRole("doctor", "hospital_admin"), async (req, res) => {
   try {
     if (process.env.AI_ENABLED === "false") {
@@ -287,7 +266,6 @@ router.post("/:id/summarize", requireAuth, requireRole("doctor", "hospital_admin
   } catch (err) { res.status(500).json({ error: err.message || "Failed to generate summary" }); }
 });
 
-// ---------- Get session ----------
 router.get("/:id", requireAuth, async (req, res) => {
   try {
     const s = await sessionOr404(req.params.id, res);
@@ -323,8 +301,6 @@ router.get("/:id", requireAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message || "Failed to get session details" }); }
 });
 
-
-// ---------- Clinical HPI follow-up questions (Decision Tree + Hybrid AI + Caching) ----------
 router.post("/:id/hpi-questions", requireAuth, async (req, res) => {
   try {
     const s = await sessionOr404(req.params.id, res);
@@ -369,7 +345,6 @@ router.post("/:id/hpi-questions", requireAuth, async (req, res) => {
 
     const effectiveSymptomKey = matchedStandardKey || sid || "general";
 
-    // 1. Check if the hospital has a configured SymptomDecisionTree for this symptom
     let tree = null;
     if (hospital_id) {
       tree = await SymptomDecisionTree.findOne({
@@ -386,17 +361,11 @@ router.post("/:id/hpi-questions", requireAuth, async (req, res) => {
       }
     }
 
-    // 2. Evaluate complexity: voice description, multi-symptom complaint, novel disease, or forced AI
     const hasVoiceDetails = transcript.length > 5;
     const isMultiSymptom = cc.includes(",") || cc.includes("and") || cc.includes("এবং") || cc.includes("और");
     const isNewDisease = !matchedStandardKey || /rash|skin|eye|urinary|breath|weakness|joint|ear|throat|wound|fracture|dengue|malaria|allergy|diabetes|sugar|pressure|heart|kidney|liver|infection|backache|pain/i.test(cc);
     const isComplexPresentation = forceAi || hasVoiceDetails || isMultiSymptom || (!tree && isNewDisease);
 
-    // ---------------------------------------------------------------------------------
-    // Branch 1: Hospital Tree Configured + Complex/Voice Presentation
-    // Personalized generation respecting hospital parameters + patient transcript.
-    // Explicitly SKIP writing to ClinicalQuestion (patient-specific, not canonical).
-    // ---------------------------------------------------------------------------------
     if (tree && isComplexPresentation) {
       console.log(`[HPI Branch 1] Personalized Tree AI generation for hospital ${hospital_id}::${tree.symptom_key}`);
       try {
@@ -421,13 +390,8 @@ router.post("/:id/hpi-questions", requireAuth, async (req, res) => {
       }
     }
 
-    // ---------------------------------------------------------------------------------
-    // Branch 2: Hospital Tree Configured + Standard Presentation
-    // Check ClinicalQuestion cache for (hospital_id, symptom_key).
-    // On miss: generate canonical questions via AI, atomically cache via bulkWrite, serve.
-    // ---------------------------------------------------------------------------------
     if (tree && !isComplexPresentation) {
-      // Check cache first
+
       const cachedQs = await ClinicalQuestion.find({
         hospital_id,
         symptom_key: tree.symptom_key,
@@ -451,7 +415,6 @@ router.post("/:id/hpi-questions", requireAuth, async (req, res) => {
         });
       }
 
-      // Cache miss: generate canonical question set
       console.log(`[HPI Branch 2] Cache MISS for ${hospital_id}::${tree.symptom_key} — generating via Ollama...`);
       const aiQs = await generateHpiQuestions(sessionObj, tree.parameters);
 
@@ -467,7 +430,6 @@ router.post("/:id/hpi-questions", requireAuth, async (req, res) => {
         };
       });
 
-      // Atomic idempotent write to ClinicalQuestion
       if (formattedQuestions.length > 0) {
         try {
           const ops = formattedQuestions.map(q => ({
@@ -489,7 +451,7 @@ router.post("/:id/hpi-questions", requireAuth, async (req, res) => {
             }
           }));
           await ClinicalQuestion.bulkWrite(ops);
-          // Delete any excess slots if parameter count changed
+
           await ClinicalQuestion.deleteMany({
             hospital_id,
             symptom_key: tree.symptom_key,
@@ -516,10 +478,6 @@ router.post("/:id/hpi-questions", requireAuth, async (req, res) => {
       });
     }
 
-    // ---------------------------------------------------------------------------------
-    // Branch 3: No Hospital Tree + Complex Presentation
-    // Freeform AI generation tailored to new/custom condition.
-    // ---------------------------------------------------------------------------------
     if (!tree && isComplexPresentation) {
       console.log("[HPI Branch 3] Freeform AI generation for: " + cc);
       try {
@@ -542,11 +500,6 @@ router.post("/:id/hpi-questions", requireAuth, async (req, res) => {
       }
     }
 
-    // ---------------------------------------------------------------------------------
-    // Branch 4: No Hospital Tree + Standard Presentation
-    // Serve global pre-seeded ClinicalQuestion (strictly hospital_id: null/absent).
-    // Zero-latency instant delivery.
-    // ---------------------------------------------------------------------------------
     const targetKey = matchedStandardKey || "general";
     const globalFilter = {
       symptom_key: targetKey,
@@ -585,7 +538,6 @@ router.post("/:id/hpi-questions", requireAuth, async (req, res) => {
   }
 });
 
-// ---------- AI-recommended doctor ----------
 router.post("/:id/recommend-doctor", requireAuth, async (req, res) => {
   try {
     const s = await sessionOr404(req.params.id, res);
@@ -594,7 +546,6 @@ router.post("/:id/recommend-doctor", requireAuth, async (req, res) => {
     const { Doctor, Hospital } = require("../db");
     const { recommendDoctor } = require("../summarizer");
 
-    // Determine which hospital's doctors to consider
     const patient = await Patient.findById(s.patient_id);
     let candidateDoctors = [];
 
@@ -606,14 +557,14 @@ router.post("/:id/recommend-doctor", requireAuth, async (req, res) => {
     if (hospitalId && validHospIds.has(hospitalId.toString())) {
       candidateDoctors = await Doctor.find({ hospital_id: hospitalId, active: true });
     } else {
-      // Self-served patient — show independent doctors only
+
       const allDocs = await Doctor.find({ active: true });
       candidateDoctors = allDocs.filter(d => {
         if (!d.hospital_id) return true;
         const hid = d.hospital_id.toString();
         return hid === "independent" || hid === "default" || hid === "none" || !validHospIds.has(hid);
       });
-      // Fallback: If no independent doctors exist, recommend from all hospital doctors
+
       if (candidateDoctors.length === 0) {
         candidateDoctors = allDocs;
       }
@@ -626,7 +577,6 @@ router.post("/:id/recommend-doctor", requireAuth, async (req, res) => {
     const rec = await recommendDoctor(s.toObject(), candidateDoctors.map(d => d.toObject()));
     const recDocId = rec?.doctor_id || candidateDoctors[0].id;
 
-    // Store recommendation
     await IntakeSession.findByIdAndUpdate(s.id, { recommended_doctor_id: recDocId });
 
     res.json({ recommended_doctor_id: recDocId, rationale: rec?.rationale || "" });

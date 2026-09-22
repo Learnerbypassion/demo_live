@@ -1,13 +1,8 @@
-/**
- * Hospital Decision Tree & Question Parameters Routes
- * Allows hospital admins to configure symptom question parameters.
- */
 const express = require("express");
 const router = express.Router({ mergeParams: true });
 const { SymptomDecisionTree, ClinicalQuestion } = require("../db");
 const { requireAuth, requireRole } = require("../auth");
 
-// Middleware: ensure user belongs to the target hospital
 function ensureHospitalAccess(req, res, next) {
   const targetHospitalId = req.params.id;
   const userHospitalId = req.user.hospital_id || req.user.id;
@@ -17,10 +12,6 @@ function ensureHospitalAccess(req, res, next) {
   next();
 }
 
-/**
- * GET /api/hospitals/:id/decision-trees
- * List all configured decision trees for this hospital
- */
 router.get("/:id/decision-trees", requireAuth, requireRole("hospital_admin"), ensureHospitalAccess, async (req, res) => {
   try {
     const trees = await SymptomDecisionTree.find({ hospital_id: req.params.id, active: true }).sort({ updatedAt: -1 });
@@ -31,11 +22,6 @@ router.get("/:id/decision-trees", requireAuth, requireRole("hospital_admin"), en
   }
 });
 
-/**
- * POST /api/hospitals/:id/decision-trees
- * Create or update symptom question parameters for this hospital.
- * Automatically invalidates stale cached ClinicalQuestion entries for this hospital + symptom.
- */
 router.post("/:id/decision-trees", requireAuth, requireRole("hospital_admin"), ensureHospitalAccess, async (req, res) => {
   try {
     const hospital_id = req.params.id;
@@ -51,7 +37,6 @@ router.post("/:id/decision-trees", requireAuth, requireRole("hospital_admin"), e
 
     const cleanSymptomKey = symptom_key.toLowerCase().trim();
 
-    // Sanitize parameters
     const cleanParams = parameters.map(p => ({
       label: (p.label || "").trim(),
       type: ["yes_no", "scale", "chips", "text"].includes(p.type) ? p.type : "yes_no",
@@ -66,14 +51,12 @@ router.post("/:id/decision-trees", requireAuth, requireRole("hospital_admin"), e
       return res.status(400).json({ error: "At least one valid parameter with a label is required." });
     }
 
-    // 1. Invalidate stale cached questions for this hospital and symptom (create or update)
     const deletedCount = await ClinicalQuestion.deleteMany({
       hospital_id,
       symptom_key: cleanSymptomKey,
     });
     console.log(`[decisionTree] Invalidated ${deletedCount.deletedCount} cached questions for ${hospital_id}::${cleanSymptomKey}`);
 
-    // 2. Upsert decision tree
     const tree = await SymptomDecisionTree.findOneAndUpdate(
       { hospital_id, symptom_key: cleanSymptomKey },
       {
@@ -95,10 +78,6 @@ router.post("/:id/decision-trees", requireAuth, requireRole("hospital_admin"), e
   }
 });
 
-/**
- * DELETE /api/hospitals/:id/decision-trees/:treeId
- * Remove a symptom decision tree and clear its cached questions
- */
 router.delete("/:id/decision-trees/:treeId", requireAuth, requireRole("hospital_admin"), ensureHospitalAccess, async (req, res) => {
   try {
     const hospital_id = req.params.id;
@@ -112,7 +91,6 @@ router.delete("/:id/decision-trees/:treeId", requireAuth, requireRole("hospital_
     const symptom_key = tree.symptom_key;
     await SymptomDecisionTree.deleteOne({ _id: treeId });
 
-    // Invalidate cached questions for this symptom at this hospital
     await ClinicalQuestion.deleteMany({ hospital_id, symptom_key });
 
     return res.json({ message: "Decision tree removed and cached questions cleared." });

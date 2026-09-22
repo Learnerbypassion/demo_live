@@ -1,21 +1,6 @@
-/**
- * MobileUpload.jsx — Phone-side document upload page for QR handoff.
- *
- * Mounted at /mobile-upload/:token (React Router path, no /dhanvantari prefix —
- * BrowserRouter basename handles that). The QR code encodes the full URL:
- *   http://<KIOSK_LAN_HOST>:<PORT>/dhanvantari/mobile-upload/<token>
- *
- * Security: token is validated server-side on every request. No patient data
- * is ever returned or displayed on this page — it is intentionally anonymous.
- *
- * Styled with inline styles only for fast, reliable loading on mobile devices over local WiFi.
- */
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 
-// When the phone opens this page via the QR code, window.location.hostname is the
-// kiosk's LAN IP (e.g. 192.168.0.108). Always prioritize window.location.hostname
-// when accessed from a mobile browser over LAN so fetch calls reach the kiosk server.
 const _backendPort = import.meta.env.VITE_BACKEND_PORT || '8000';
 const _isLocalhost = typeof window !== 'undefined' &&
   (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
@@ -29,8 +14,6 @@ const API_BASE = import.meta.env.VITE_API_URL
           ? `http://${window.location.hostname}:${_backendPort}/api`
           : '/api'));
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 async function validateToken(token) {
   const res = await fetch(`${API_BASE}/mobile-upload/${token}`);
   return res.json();
@@ -43,7 +26,6 @@ async function uploadFile(token, file, onProgress) {
 
     const xhr = new XMLHttpRequest();
     xhr.open('POST', `${API_BASE}/mobile-upload/${token}/document`);
-    // No Authorization header — token in URL is the only credential.
 
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
@@ -67,8 +49,6 @@ async function uploadFile(token, file, onProgress) {
   });
 }
 
-// ─── SVG Icons ────────────────────────────────────────────────────────────────
-
 function CameraIcon({ size = 20, color = '#ffffff' }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -91,7 +71,7 @@ function BriefcaseIcon() {
     <svg width="42" height="42" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="3.5" y="7.5" width="21" height="16" rx="4" fill="#ffffff" stroke="#0284c7" strokeWidth="2.2" />
       <path d="M10 7.5V5.5C10 4.4 10.9 3.5 12 3.5H16C17.1 3.5 18 4.4 18 5.5V7.5" stroke="#0284c7" strokeWidth="2.2" strokeLinecap="round" />
-      {/* Medical Cross */}
+      {}
       <path d="M14 11.5V19.5M10 15.5H18" stroke="#ef4444" strokeWidth="2.8" strokeLinecap="round" />
     </svg>
   );
@@ -104,8 +84,6 @@ function CheckmarkIcon() {
     </svg>
   );
 }
-
-// ─── Header ───────────────────────────────────────────────────────────────────
 
 function Header() {
   return (
@@ -161,12 +139,10 @@ function Header() {
           </p>
         </div>
       </div>
-      {/* Note: Top-right ABDM Compliant badge deliberately omitted per instructions */}
+      {}
     </header>
   );
 }
-
-// ─── Hidden file inputs ────────────────────────────────────────────────────────
 
 function HiddenInput({ inputRef, accept, capture }) {
   return (
@@ -179,8 +155,6 @@ function HiddenInput({ inputRef, accept, capture }) {
     />
   );
 }
-
-// ─── Main Component ────────────────────────────────────────────────────────────
 
 export default function MobileUpload() {
   const { token } = useParams();
@@ -204,7 +178,6 @@ export default function MobileUpload() {
   const cameraRef = useRef(null);
   const fileRef   = useRef(null);
 
-  // ── Validate token on mount ──────────────────────────────────────────────────
   useEffect(() => {
     if (!token) {
       setTokenError('No upload token found in this link. Please scan the QR code again.');
@@ -232,7 +205,6 @@ export default function MobileUpload() {
       .finally(() => setValidating(false));
   }, [token]);
 
-  // ── Handle file selection from either input ──────────────────────────────────
   const handleFile = async (file) => {
     if (!file) return;
     setUploadError('');
@@ -261,7 +233,6 @@ export default function MobileUpload() {
     }
   };
 
-  // Wire hidden inputs to handler
   const wireInput = (ref) => {
     if (!ref.current) return;
     ref.current.onchange = (e) => handleFile(e.target.files?.[0]);
@@ -278,7 +249,6 @@ export default function MobileUpload() {
     setCloseNotice(true);
   };
 
-  // ── Page styles ──────────────────────────────────────────────────────────────
   const pageStyle = {
     minHeight: '100vh',
     background: '#f8fafc',
@@ -308,7 +278,6 @@ export default function MobileUpload() {
     background: 'linear-gradient(90deg, #0284c7 0%, #10b981 100%)',
   };
 
-  // ── Loading state ────────────────────────────────────────────────────────────
   if (validating) {
     return (
       <div style={pageStyle}>
@@ -338,7 +307,6 @@ export default function MobileUpload() {
     );
   }
 
-  // ── Invalid / expired token ──────────────────────────────────────────────────
   if (!tokenValid) {
     return (
       <div style={pageStyle}>
@@ -371,7 +339,6 @@ export default function MobileUpload() {
     );
   }
 
-  // ── Success state (Matches Image 2) ──────────────────────────────────────────
   if (uploaded) {
     return (
       <div style={pageStyle}>
@@ -380,7 +347,7 @@ export default function MobileUpload() {
         <div style={cardStyle}>
           <div style={cardAccent} />
           <div style={{ padding: '36px 24px 28px' }}>
-            {/* Green rounded success badge */}
+            {}
             <div style={{
               width: '74px',
               height: '74px',
@@ -431,7 +398,7 @@ export default function MobileUpload() {
               </div>
             )}
 
-            {/* Upload Another Document button */}
+            {}
             <button
               id="mobile-upload-another-btn"
               style={{
@@ -466,7 +433,7 @@ export default function MobileUpload() {
               <span>Upload Another Document</span>
             </button>
 
-            {/* Close Window button */}
+            {}
             <button
               id="mobile-upload-close-btn"
               style={{
@@ -504,7 +471,6 @@ export default function MobileUpload() {
     );
   }
 
-  // ── Main Upload UI (Matches Image 1) ─────────────────────────────────────────
   return (
     <div style={pageStyle}>
       <HiddenInput inputRef={cameraRef} accept="image/*" capture="environment" />
@@ -515,7 +481,7 @@ export default function MobileUpload() {
       <div style={cardStyle}>
         <div style={cardAccent} />
         <div style={{ padding: '32px 24px 28px' }}>
-          {/* Medical briefcase icon */}
+          {}
           <div style={{
             width: '68px',
             height: '68px',
@@ -550,7 +516,7 @@ export default function MobileUpload() {
             Upload a prescription, lab report, or medical record to share with the kiosk.
           </p>
 
-          {/* Button 1: Take Photo */}
+          {}
           <button
             id="mobile-upload-camera-btn"
             style={{
@@ -583,7 +549,7 @@ export default function MobileUpload() {
             <span>Take Photo</span>
           </button>
 
-          {/* Divider: OR */}
+          {}
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -602,7 +568,7 @@ export default function MobileUpload() {
             <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
           </div>
 
-          {/* Button 2: Choose from Gallery / Files */}
+          {}
           <button
             id="mobile-upload-file-btn"
             style={{
@@ -635,7 +601,7 @@ export default function MobileUpload() {
             <span>Choose from Gallery / Files</span>
           </button>
 
-          {/* Upload Progress */}
+          {}
           {uploading && (
             <div style={{ marginTop: '20px' }}>
               <div style={{
@@ -659,7 +625,7 @@ export default function MobileUpload() {
             </div>
           )}
 
-          {/* Upload Error */}
+          {}
           {uploadError && !uploading && (
             <div style={{
               marginTop: '20px',
@@ -695,7 +661,7 @@ export default function MobileUpload() {
             </div>
           )}
 
-          {/* File size disclaimer */}
+          {}
           <p style={{
             marginTop: '24px',
             marginBottom: 0,
@@ -707,7 +673,7 @@ export default function MobileUpload() {
           </p>
         </div>
       </div>
-      {/* Note: Bottom compliance footer deliberately omitted per instructions */}
+      {}
     </div>
   );
 }

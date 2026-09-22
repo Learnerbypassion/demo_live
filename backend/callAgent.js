@@ -1,19 +1,3 @@
-/**
- * MediKiosk -- Automated Queue-Calling & SMS Notification Agent
- *
- * Uses Twilio Programmable Voice (primary) with Twilio Programmable Messaging (fallback)
- * when TWILIO_ACCOUNT_SID + TWILIO_AUTH_TOKEN + TWILIO_FROM_NUMBER are configured.
- *
- * When Twilio is unconfigured or in demo mode:
- *   - Logs clearly to console with phone numbers masked (same format as otpService.js).
- *   - Never blocks, never throws, and allows the kiosk/doctor app to operate completely normally.
- *
- * NOTE FOR LIVE DEMOS (TWILIO TRIAL ACCOUNTS):
- *   Twilio trial accounts can ONLY call or text phone numbers that have been
- *   pre-verified in your Twilio Console (Verified Caller IDs). Live calls will
- *   connect to team members' verified numbers, while demo mode handles all other numbers.
- */
-
 const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
 const TWILIO_AUTH_TOKEN   = process.env.TWILIO_AUTH_TOKEN;
 const TWILIO_FROM_NUMBER  = process.env.TWILIO_FROM_NUMBER;
@@ -43,15 +27,6 @@ function printCallAgentStartupWarning() {
   }
 }
 
-/**
- * Mask phone number to protect patient privacy in console logs:
- * e.g. "+919876543210" -> "********3210"
- */
-
-/**
- * Normalizes a phone number to standard E.164 format.
- * Converts 10-digit Indian mobile numbers (e.g. "6297796553") -> "+916297796553"
- */
 function normalizePhone(phone) {
   if (!phone || typeof phone !== "string") return "";
   let clean = phone.trim().replace(/[\s\-\(\)]/g, "");
@@ -72,9 +47,6 @@ function maskPhone(phone) {
   return phone.length > 4 ? phone.slice(0, -4).replace(/./g, "*") + phone.slice(-4) : phone;
 }
 
-/**
- * Map Indian languages to Twilio <Say> supported language codes and voices
- */
 const LANGUAGE_SAY_MAP = {
   hindi: { lang: "hi-IN", voice: "Polly.Aditi" },
   tamil: { lang: "ta-IN", voice: "Polly.Valluvar" },
@@ -102,19 +74,13 @@ function escapeXml(unsafe) {
     .replace(/'/g, "&apos;");
 }
 
-/**
- * Outbound Voice Call via Twilio Programmable Voice
- */
 async function callPatient(phone, message, { language = "English" } = {}) {
   const normalizedPhone = normalizePhone(phone);
   const masked = maskPhone(normalizedPhone);
   const sayConfig = getTwilioSayConfig(language);
 
   if (CALL_AGENT_ENABLED && twilioClient) {
-    // Twilio Trial accounts restrict the inline 'twiml' parameter (throws "trial accounts have limited parameter access").
-    // Twilio's official Twimlet URL service dynamically renders <Say> for any message text and voice on BOTH trial and full accounts.
-    // Use Twilio's twimlet echo with <Hangup/> so the call cleanly terminates after speaking
-    // and never attempts an invalid next action (which causes the "application error" prompt).
+
     const twimlXml = `<Response><Say language="${sayConfig.lang}" voice="${sayConfig.voice}">${escapeXml(message)}</Say><Hangup/></Response>`;
     const twimletUrl = process.env.TWILIO_TWIML_URL || `https://twimlets.com/echo?Twiml=${encodeURIComponent(twimlXml)}`;
 
@@ -133,14 +99,10 @@ async function callPatient(phone, message, { language = "English" } = {}) {
     }
   }
 
-  // Demo fallback
   console.log(`[callAgent][DEMO CALL] Calling ${masked} [${sayConfig.lang}]: "${message}"`);
   return { success: true, demo: true, mode: "call", message };
 }
 
-/**
- * Outbound SMS via Twilio Programmable Messaging
- */
 async function textPatient(phone, message) {
   const normalizedPhone = normalizePhone(phone);
   const masked = maskPhone(normalizedPhone);
@@ -160,17 +122,10 @@ async function textPatient(phone, message) {
     }
   }
 
-  // Demo fallback
   console.log(`[callAgent][DEMO SMS] Texting ${masked}: "${message}"`);
   return { success: true, demo: true, mode: "sms", message };
 }
 
-/**
- * Unified notification helper:
- * - mode = "call": attempts phone call first; if Twilio fails (e.g. trial unverified number), falls back to SMS.
- * - mode = "sms": sends SMS directly.
- * - Always non-blocking and safe: never throws to caller.
- */
 async function notifyPatient(phone, message, { mode = "call", language = "English" } = {}) {
   const masked = maskPhone(phone);
   try {
@@ -184,7 +139,6 @@ async function notifyPatient(phone, message, { mode = "call", language = "Englis
       return { ...res, path: "sms_direct" };
     }
 
-    // Default: Voice call with automatic SMS fallback
     try {
       const callRes = await callPatient(phone, message, { language });
       return { ...callRes, path: callRes.demo ? "demo_call" : "call_succeeded" };

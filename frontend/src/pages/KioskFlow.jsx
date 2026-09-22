@@ -11,7 +11,6 @@ import { api } from '../services/api';
 import { useSpeech, SUPPORTED_LANGUAGES } from '../hooks/useSpeech';
 import { getTranslation, SYMPTOM_TRANSLATIONS, STEP_PROMPTS_BY_LANG, getQuestionOptions, getAyushLabelTrans, getAyushQuestionTrans, getAyushOptionTrans } from '../utils/kioskTranslations';
 
-
 const getQEng = (q) => (typeof q === "object" && q ? q.english || q.translated : q) || "";
 const getQTrans = (q) => (typeof q === "object" && q ? q.translated || q.english : q) || "";
 
@@ -63,7 +62,7 @@ function AIThinkingLoader({ chiefComplaint, t }) {
 
   return (
     <div className="flex flex-col items-center justify-center py-6 px-4 max-w-lg mx-auto text-center select-none">
-      {/* Live AI Badge */}
+      {}
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -76,7 +75,7 @@ function AIThinkingLoader({ chiefComplaint, t }) {
         <span>{t ? t('aiEngineActive') : 'AI Clinical Engine Active'}</span>
       </motion.div>
 
-      {/* Animated Glowing Orb & Brain */}
+      {}
       <div className="relative mb-8 flex items-center justify-center">
         <motion.div
           animate={{ scale: [1, 1.35, 1], opacity: [0.35, 0.08, 0.35] }}
@@ -89,7 +88,7 @@ function AIThinkingLoader({ chiefComplaint, t }) {
           className="absolute w-44 h-44 rounded-full bg-accent-400 blur-xl"
         />
 
-        {/* Orbiting particles */}
+        {}
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
@@ -106,7 +105,7 @@ function AIThinkingLoader({ chiefComplaint, t }) {
           <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-accent-500 shadow-sm" />
         </motion.div>
 
-        {/* Central glowing icon container */}
+        {}
         <motion.div
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
@@ -116,7 +115,7 @@ function AIThinkingLoader({ chiefComplaint, t }) {
         </motion.div>
       </div>
 
-      {/* Dynamic Animated Text Headline */}
+      {}
       <div className="h-12 flex items-center justify-center mb-2">
         <AnimatePresence mode="wait">
           <motion.h3
@@ -132,7 +131,7 @@ function AIThinkingLoader({ chiefComplaint, t }) {
         </AnimatePresence>
       </div>
 
-      {/* Selected symptoms context tags */}
+      {}
       {chiefComplaint && chiefComplaint.length > 0 && (
         <div className="mb-6 flex flex-wrap items-center justify-center gap-1.5 max-w-md">
           <span className="text-xs text-gray-400 font-medium mr-1">{t ? t('evaluating') : 'Evaluating:'}</span>
@@ -147,7 +146,7 @@ function AIThinkingLoader({ chiefComplaint, t }) {
         </div>
       )}
 
-      {/* Progress Bar */}
+      {}
       <div className="w-full max-w-xs mb-3">
         <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden border border-gray-200">
           <motion.div
@@ -159,7 +158,7 @@ function AIThinkingLoader({ chiefComplaint, t }) {
         </div>
       </div>
 
-      {/* Pulsing indicator dots */}
+      {}
       <div className="flex items-center space-x-1.5 text-xs text-gray-400 font-medium">
         <span>{t ? t('formulatingQuestions') : 'Formulating clinical intake questions'}</span>
         <span className="flex space-x-1 ml-1">
@@ -184,7 +183,6 @@ function AIThinkingLoader({ chiefComplaint, t }) {
   );
 }
 
-
 function getFullAyushSpeechText(q, lang) {
   if (!q) return '';
   const transQ = getAyushQuestionTrans(q, lang);
@@ -192,7 +190,6 @@ function getFullAyushSpeechText(q, lang) {
 
   const translatedOptions = q.options.map(opt => getAyushOptionTrans(q.field, opt, lang));
 
-  // Regional option prefixes for all supported Indic languages + English
   const prefixMap = {
     Bengali:   (i, o) => `বিকল্প ${i + 1}: ${o}`,
     Hindi:     (i, o) => `विकल्प ${i + 1}: ${o}`,
@@ -225,7 +222,7 @@ function getFullHpiSpeechText(qItem, lang) {
   if (qItem.options && Array.isArray(qItem.options) && qItem.options.length > 0) {
     labels = qItem.options.map(o => typeof o === 'string' ? o : o.label || o.text || o.value || '');
   } else {
-    // Dynamically infer interactive choices from question text (e.g. fever duration, pain scale, yes/no)
+
     const qConfig = getQuestionOptions(qTrans, lang, qEng);
     if (qConfig?.type === 'scale') {
       isScale = true;
@@ -265,7 +262,7 @@ function getFullHpiSpeechText(qItem, lang) {
 }
 
 export default function KioskFlow() {
-  // Localization helper
+
   const t = (key, ...args) => getTranslation(key, selectedLanguage, ...args);
   const navigate = useNavigate();
   const location = useLocation();
@@ -275,7 +272,6 @@ export default function KioskFlow() {
   const urlHospId = searchParams.get('hospital_id');
   const urlKioskId = searchParams.get('kiosk_id');
 
-  // Priority: URL Param -> Location State -> LocalStorage -> Registered Hospital Default
   const [kioskHospitalId, setKioskHospitalId] = useState(
     urlHospId || location.state?.hospital_id || localStorage.getItem('mediKiosk_hospital_id') || '6a9c3b6bf41dd3e1afb895f1'
   );
@@ -359,18 +355,17 @@ export default function KioskFlow() {
   const [isUploading, setIsUploading] = useState(false);
   const [ocrNotice,   setOcrNotice]  = useState(null);
 
-  // QR-code phone handoff state
   const [uploadToken,  setUploadToken]  = useState(null);
   const [qrDataUrl,    setQrDataUrl]    = useState(null);
   const [qrLoading,    setQrLoading]    = useState(false);
-  const [qrError,      setQrError]      = useState(null); // 'localhost_guard' | 'fetch_error' | null
+  const [qrError,      setQrError]      = useState(null);
   const pollIntervalRef  = useRef(null);
   const prevDocCountRef  = useRef(0);
 
   const STEP_PROMPTS = STEP_PROMPTS_BY_LANG[selectedLanguage] || STEP_PROMPTS_BY_LANG.English;
 
   useEffect(() => {
-    // Exclude step 4 (HPI) and 4.5 (AYUSH) so generic prompts do not cancel the clinical questions
+
     if (audioEnabled && step !== 4 && step !== 4.5 && STEP_PROMPTS[step]) {
       const t = setTimeout(() => speak(STEP_PROMPTS[step], selectedLanguage), 400);
       return () => clearTimeout(t);
@@ -382,13 +377,11 @@ export default function KioskFlow() {
       api.getAyushQuestions().then(q => setAyushQuestions(q)).catch(() => {});
   }, [intakeData.mode]);
 
-  // Auto-speak AYUSH Dashavidha Question + All Options (with pre-announcement on question 1)
   useEffect(() => {
     if (step === 4.5 && audioEnabled && ayushQuestions[ayushSubStep]) {
       const q = ayushQuestions[ayushSubStep];
       let speechText = getFullAyushSpeechText(q, selectedLanguage);
 
-      // On the first question, include the pre-announcement intro seamlessly
       if (ayushSubStep === 0) {
         const introPrompt = STEP_PROMPTS_BY_LANG[selectedLanguage]?.[4.5] || STEP_PROMPTS_BY_LANG.English?.[4.5];
         if (introPrompt) {
@@ -402,7 +395,6 @@ export default function KioskFlow() {
     }
   }, [step, ayushSubStep, audioEnabled, selectedLanguage, ayushQuestions]);
 
-  // Auto-speak HPI Question + Options (if any)
   useEffect(() => {
     if (step === 4 && audioEnabled && hpiQuestions[hpiSubStep]) {
       const qItem = hpiQuestions[hpiSubStep];
@@ -412,11 +404,9 @@ export default function KioskFlow() {
     }
   }, [step, hpiSubStep, audioEnabled, selectedLanguage, hpiQuestions]);
 
-  // QR-code phone handoff: issue token + fetch QR on entering Step 5,
-  // then poll GET /api/sessions/:id every 3s until phone-side upload detected.
   useEffect(() => {
     if (step !== 5) {
-      // Clean up polling whenever we leave Step 5
+
       if (pollIntervalRef.current) { clearInterval(pollIntervalRef.current); pollIntervalRef.current = null; }
       return;
     }
@@ -433,11 +423,10 @@ export default function KioskFlow() {
       setUploadToken(null);
 
       try {
-        // 1. Issue upload token (also proactively expires stale tokens on same kiosk)
+
         const tokenRes = await api.requestUploadToken(sid);
         if (cancelled) return;
 
-        // 2. If server reports localhost, show the warning banner — don't fetch a useless QR
         if (tokenRes.is_localhost) {
           setQrError('localhost_guard');
           setQrLoading(false);
@@ -447,13 +436,10 @@ export default function KioskFlow() {
         const tok = tokenRes.token;
         setUploadToken(tok);
 
-        // 3. Fetch QR data URL
         const qrRes = await api.getMobileUploadQr(tok);
         if (cancelled) return;
         setQrDataUrl(qrRes.qr_data_url);
 
-        // 4. Poll the existing GET /api/sessions/:id every 3 s.
-        //    Compare document count; update state when phone-side upload appears.
         prevDocCountRef.current = intakeData.documents.length;
         pollIntervalRef.current = setInterval(async () => {
           try {
@@ -461,12 +447,12 @@ export default function KioskFlow() {
             const docs = sessionData?.documents || [];
             if (docs.length > prevDocCountRef.current) {
               prevDocCountRef.current = docs.length;
-              // Mirror what handleFileChange does: update ocrResult + intakeData.documents
+
               const lastDoc = docs[docs.length - 1];
               setOcrResult({ medications: lastDoc.medications || [], labs: lastDoc.labs || [] });
               setIntakeData(p => ({ ...p, documents: docs.map(d => d.filename || d.id) }));
             }
-          } catch (_) { /* network blip — keep polling */ }
+          } catch (_) {  }
         }, 3000);
 
       } catch (err) {
@@ -482,9 +468,8 @@ export default function KioskFlow() {
       cancelled = true;
       if (pollIntervalRef.current) { clearInterval(pollIntervalRef.current); pollIntervalRef.current = null; }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step]);
 
+  }, [step]);
 
   useEffect(() => {
     api.getDoctors({ hospital_id: kioskHospitalId }).then(d => {
@@ -520,12 +505,11 @@ export default function KioskFlow() {
       };
       const res = await api.kioskCheckin(params);
       if (res?.token) handleAuthSuccess(res.token, { ...res.patient, role: 'patient' });
-      // Always show ABHA registry demographics for display (name, dob, age, gender)
-      // but keep the DB patient id for session linking
+
       const dbPatient = res.patient || {};
       const mergedPatient = {
         ...dbPatient,
-        // ABHA demographics override stale DB fields for display
+
         ...(demographics ? {
           name:    demographics.name    || dbPatient.name,
           dob:     demographics.dob     || dbPatient.dob,
@@ -598,7 +582,6 @@ export default function KioskFlow() {
         const cleanText = transcript.trim();
         const lower = cleanText.toLowerCase();
 
-        // 1. Ordinal and numeric recognition in Bengali, Hindi, and English
         let matchedIdx = -1;
         if (/^(১|এক|প্রথম|প্রথমটা|1|one|first|पहला|एक)/i.test(lower)) matchedIdx = 0;
         else if (/^(২|দুই|দ্বিতীয়|দ্বিতীয়টা|2|two|second|दूसरा|दो)/i.test(lower)) matchedIdx = 1;
@@ -610,7 +593,6 @@ export default function KioskFlow() {
           return;
         }
 
-        // 2. Direct keyword / phrase match against options
         let matchedOption = null;
         for (const opt of currentQ.options) {
           const transOpt = getAyushOptionTrans(currentQ.field, opt, selectedLanguage);
@@ -640,7 +622,6 @@ export default function KioskFlow() {
     const transQ = getQTrans(currentItem);
     const engQ = getQEng(currentItem);
 
-    // Resolve interactive options for recognition
     const qConfig = (currentItem?.type === 'scale')
       ? { type: 'scale', options: [1,2,3,4,5,6,7,8,9,10].map(n => ({ label: String(n), value: String(n) })) }
       : (currentItem?.options && currentItem.options.length > 0)
@@ -654,7 +635,6 @@ export default function KioskFlow() {
         const cleanText = transcript.trim();
         const lower = cleanText.toLowerCase();
 
-        // 1. Ordinal and numeric recognition (e.g. Option 1, Option 2, 1, 2, first, second, এক, দুই, প্রথম, دوسرا, etc.)
         let matchedIdx = -1;
         if (/^(১|এক|প্রথম|প্রথমটা|option 1|option one|one|first|पहला|एक)/i.test(lower)) matchedIdx = 0;
         else if (/^(২|দুই|দ্বিতীয়|দ্বিতীয়টা|option 2|option two|two|second|दूसरा|दो)/i.test(lower)) matchedIdx = 1;
@@ -677,7 +657,6 @@ export default function KioskFlow() {
           return;
         }
 
-        // 2. Direct keyword / phrase match against available option labels
         let matchedOption = null;
         if (qConfig?.options && Array.isArray(qConfig.options)) {
           for (const opt of qConfig.options) {
@@ -741,7 +720,7 @@ export default function KioskFlow() {
             res.questions.map(async (q) => {
               if (typeof q === "object" && q.english) {
                 let trans = (q.translations && q.translations[selectedLanguage]) || q.english;
-                // If AI generated and non-English, translate on the fly
+
                 if (selectedLanguage !== "English" && trans === q.english) {
                   try {
                     const tr = await api.translate(q.english, selectedLanguage);
@@ -823,7 +802,7 @@ export default function KioskFlow() {
         setTimeout(() => speak(spText, selectedLanguage), 300);
       }
     } else {
-      // Completed all questions -> move to next step!
+
       setStep(intakeData.mode === "AYUSH" ? 4.5 : 5);
     }
   };
@@ -833,7 +812,7 @@ export default function KioskFlow() {
     if (ayushSubStep < ayushQuestions.length - 1) {
       setAyushSubStep(s => s + 1);
     } else {
-      // Completed all 10 Dashavidha Pariksha questions -> Move to Step 5 (OCR Scan)!
+
       setStep(5);
     }
   };
@@ -957,7 +936,7 @@ export default function KioskFlow() {
     if (!hasSpec) return true;
     return intakeData.mode === 'AYUSH' ? isAyu : !isAyu;
   });
-  // Fallback: If no doctor found for current mode or independent, show all available hospital doctors
+
   const displayDoctors = filteredDoctors.length > 0 ? filteredDoctors : (availableDoctors.length > 0 ? availableDoctors : doctors);
 
   return (
@@ -1154,7 +1133,7 @@ export default function KioskFlow() {
                 <div>
                   <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">{t('symptomsTitle')}</h2>
                   <p className="text-gray-500 mb-3 text-xs sm:text-sm">{t('symptomsSubtitle', selectedLanguage)}</p>
-                  
+
                   <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-2.5 mb-3">
                     {SYMPTOMS_LIST.map(sym => {
                       const symLabel = SYMPTOM_TRANSLATIONS[sym.id]?.[selectedLanguage] || sym.label;
@@ -1170,7 +1149,7 @@ export default function KioskFlow() {
                   </div>
                 </div>
 
-                {/* Unified Custom Disease & Voice Input Bar */}
+                {}
                 <div className="bg-gray-50/90 p-2.5 rounded-2xl border border-gray-200 mt-1">
                   <div className="flex items-center space-x-2">
                     <button
@@ -1222,7 +1201,7 @@ export default function KioskFlow() {
                     </button>
                   </div>
 
-                  {/* Display user's custom added symptoms if any */}
+                  {}
                   {intakeData.chiefComplaint.filter(c => !SYMPTOMS_LIST.some(s => s.label === c || (SYMPTOM_TRANSLATIONS[s.id] && Object.values(SYMPTOM_TRANSLATIONS[s.id]).includes(c)))).length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-2 pt-2 border-t border-gray-200">
                       {intakeData.chiefComplaint
@@ -1252,7 +1231,7 @@ export default function KioskFlow() {
                   <AIThinkingLoader chiefComplaint={intakeData.chiefComplaint} t={t} />
                 ) : hpiSubStep < hpiQuestions.length ? (
                   <div className="h-full flex flex-col justify-between">
-                    {/* Compact Top Heading & Question Progress */}
+                    {}
                     <div className="flex items-center justify-between pb-2 border-b border-gray-100 shrink-0">
                       <div className="flex items-center gap-2">
                         <div className="p-1.5 rounded-lg bg-brand-50 text-brand-600">
@@ -1275,7 +1254,7 @@ export default function KioskFlow() {
                       </div>
                     </div>
 
-                    {/* Bilingual Question Box */}
+                    {}
                     <div className="bg-gradient-to-r from-brand-50 to-blue-50/40 border border-brand-200 rounded-xl p-3 sm:p-3.5 shadow-2xs shrink-0 my-1">
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
@@ -1304,7 +1283,7 @@ export default function KioskFlow() {
                       </div>
                     </div>
 
-                    {/* Interactive Question Options / Rating Scale */}
+                    {}
                     {(() => {
                       const currentItem = hpiQuestions[hpiSubStep];
                       const engQ = getQEng(currentItem);
@@ -1415,7 +1394,7 @@ export default function KioskFlow() {
                       return null;
                     })()}
 
-                    {/* Compact Voice Mic & Answer Input Bar */}
+                    {}
                     <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-xl border border-gray-200 shrink-0 my-0.5">
                       <button
                         type="button"
@@ -1443,7 +1422,7 @@ export default function KioskFlow() {
                       />
                     </div>
 
-                    {/* Compact Next Question & Skip Actions */}
+                    {}
                     <div className="flex space-x-2.5 shrink-0 pt-1">
                       <button
                         type="button"
@@ -1497,7 +1476,7 @@ export default function KioskFlow() {
 
                   return (
                     <div className="h-full flex flex-col justify-between">
-                      {/* Compact AYUSH Header */}
+                      {}
                       <div className="flex items-center justify-between pb-2 border-b border-gray-100 shrink-0">
                         <div className="flex items-center gap-2">
                           <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700">
@@ -1523,7 +1502,7 @@ export default function KioskFlow() {
                         </div>
                       </div>
 
-                      {/* Bilingual Ayurvedic Question Box */}
+                      {}
                       <div className="bg-gradient-to-r from-emerald-50 to-teal-50/50 p-3 sm:p-3.5 rounded-xl border border-emerald-200 shadow-2xs shrink-0 my-1">
                         <div className="flex items-center justify-between mb-1">
                           <div className="flex items-center gap-2">
@@ -1556,7 +1535,7 @@ export default function KioskFlow() {
                         </p>
                       </div>
 
-                      {/* Options Grid */}
+                      {}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 shrink-0 my-0.5">
                         {q.options.map(opt => {
                           const transOpt = getAyushOptionTrans(q.field, opt, selectedLanguage);
@@ -1585,7 +1564,7 @@ export default function KioskFlow() {
                         })}
                       </div>
 
-                      {/* Voice Mic & Transcription Input Bar */}
+                      {}
                       <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-xl border border-gray-200 shrink-0 my-0.5">
                         <button
                           type="button"
@@ -1609,7 +1588,7 @@ export default function KioskFlow() {
                         />
                       </div>
 
-                      {/* Next / Skip Buttons */}
+                      {}
                       <div className="flex space-x-2.5 shrink-0 pt-1">
                         <button
                           type="button"
@@ -1661,10 +1640,10 @@ export default function KioskFlow() {
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 text-center">Scan Past Records</h2>
                 <p className="text-gray-500 mb-4 text-center text-xs sm:text-sm">Upload previous prescriptions or lab reports (max 10 MB).</p>
 
-                {/* Two-column layout: tap-upload + QR panel */}
+                {}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
 
-                  {/* ── Left: Upload disabled for demo ── */}
+                  {}
                   <div>
                     <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 text-center">Tap to upload here</p>
                     <div
@@ -1681,7 +1660,7 @@ export default function KioskFlow() {
                     </div>
                   </div>
 
-                  {/* ── Right: QR code panel disabled for demo ── */}
+                  {}
                   <div>
                     <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 text-center">Or scan QR with your phone</p>
                     <div className="border-2 border-gray-200 rounded-2xl p-4 flex flex-col items-center justify-center bg-gray-100/80 opacity-60 cursor-not-allowed select-none min-h-[160px]">
@@ -1697,7 +1676,7 @@ export default function KioskFlow() {
                   </div>
                 </div>
 
-                {/* On-premise OCR informational notice — shown immediately in public demo */}
+                {}
                 <div className="mt-4 p-3.5 bg-blue-50 border border-blue-200 rounded-xl text-left flex items-start gap-2.5 shadow-xs">
                   <span className="text-base leading-none mt-0.5">ℹ️</span>
                   <div>

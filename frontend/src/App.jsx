@@ -20,12 +20,12 @@ function App() {
           <Route path="/hospital-login" element={<HospitalLogin />} />
           <Route path="/kiosk" element={<KioskFlow />} />
           <Route path="/patient-login" element={<PatientLogin />} />
-          
+
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/receptionist-dashboard" element={<ReceptionistDashboard />} />
           <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
           <Route path="/patient-dashboard" element={<PatientDashboard />} />
-          {/* QR-code phone handoff — /mobile-upload/:token (no base prefix; BrowserRouter basename handles /dhanvantari) */}
+          {}
           <Route path="/mobile-upload/:token" element={<MobileUpload />} />
         </Routes>
       </BrowserRouter>

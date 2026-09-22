@@ -1,9 +1,3 @@
-/**
- * MediKiosk — ABHA Registry Client (Single Source of Truth)
- *
- * Proxies lookup queries directly to the Mock National ABHA Central Server (Port 8005),
- * with graceful in-memory fallback if the central server is booting or offline.
- */
 const axios = require("axios");
 
 const ABHA_SERVER_URL = process.env.ABHA_SERVER_URL || "http://localhost:8005";
@@ -36,7 +30,7 @@ async function lookupAbha({ abha_id, phone } = {}) {
         return { ...res.data.patient, source: "mock_central_server" };
       }
     } catch (_) {
-      // Graceful fallback to local seed data if server is offline
+
     }
   }
 

@@ -15,7 +15,6 @@ export default function HospitalLogin() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Form states
   const [regForm, setRegForm] = useState({ name: '', registration_no: '', email: '', password: '' });
   const [adminForm, setAdminForm] = useState({ name: '', registration_no: '', password: '' });
   const [staffForm, setStaffForm] = useState({ email: '', password: '' });
@@ -105,10 +104,10 @@ export default function HospitalLogin() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center p-4 sm:p-6 relative">
-      
-      {/* Top Navigation Bar: Back Button & GitHub Repo Button */}
+
+      {}
       <div className="w-full flex items-center justify-between sm:block mb-4 sm:mb-0">
-        <button 
+        <button
           onClick={() => navigate('/')}
           className="sm:absolute sm:top-8 sm:left-8 flex items-center text-gray-500 hover:text-gray-900 transition-colors font-medium text-sm sm:text-base"
         >
@@ -122,12 +121,12 @@ export default function HospitalLogin() {
       </div>
 
       <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-10 w-full max-w-5xl mx-auto my-auto py-4 sm:py-0">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden shrink-0"
         >
-        {/* Header */}
+        {}
         <div className="bg-brand-900 px-6 py-6 sm:px-8 sm:py-8 text-white text-center">
           <div className="inline-flex justify-center mb-3 sm:mb-4">
             <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="Dhanvantri" className="w-16 h-16 sm:w-20 sm:h-20 drop-shadow-md rounded-2xl object-contain bg-white p-2 shadow-md" />
@@ -136,7 +135,7 @@ export default function HospitalLogin() {
           <p className="text-brand-100 mt-1.5 sm:mt-2 text-xs sm:text-sm">Secure access for authorized healthcare personnel</p>
         </div>
 
-        {/* Tabs - Only show if not registering */}
+        {}
         {!isRegistering && (
           <div className="flex border-b border-gray-100 bg-gray-50/50">
             {tabs.map((tab) => {
@@ -152,7 +151,7 @@ export default function HospitalLogin() {
                   <Icon className={`w-5 h-5 mb-1 ${isActive ? 'text-brand-600' : 'text-gray-400'}`} />
                   {tab.label}
                   {isActive && (
-                    <motion.div 
+                    <motion.div
                       layoutId="activeTab"
                       className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-600"
                     />
@@ -163,7 +162,7 @@ export default function HospitalLogin() {
           </div>
         )}
 
-        {/* Form Content */}
+        {}
         <div className="p-8">
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg font-medium">
@@ -172,8 +171,8 @@ export default function HospitalLogin() {
           )}
 
           <AnimatePresence mode="wait">
-            
-            {/* Registration Form for Admin */}
+
+            {}
             {isRegistering ? (
               <motion.form
                 key="register"
@@ -190,13 +189,13 @@ export default function HospitalLogin() {
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <Building2 className="h-5 w-5 text-gray-400" />
                     </div>
-                    <input 
-                      type="text" 
-                      required 
+                    <input
+                      type="text"
+                      required
                       value={regForm.name}
                       onChange={(e) => setRegForm({ ...regForm, name: e.target.value })}
-                      className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm" 
-                      placeholder="e.g. City General Hospital" 
+                      className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
+                      placeholder="e.g. City General Hospital"
                     />
                   </div>
                 </div>
@@ -207,13 +206,13 @@ export default function HospitalLogin() {
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <FileText className="h-5 w-5 text-gray-400" />
                     </div>
-                    <input 
-                      type="text" 
-                      required 
+                    <input
+                      type="text"
+                      required
                       value={regForm.registration_no}
                       onChange={(e) => setRegForm({ ...regForm, registration_no: e.target.value })}
-                      className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm" 
-                      placeholder="Registration ID" 
+                      className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
+                      placeholder="Registration ID"
                     />
                   </div>
                 </div>
@@ -224,13 +223,13 @@ export default function HospitalLogin() {
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <Mail className="h-5 w-5 text-gray-400" />
                     </div>
-                    <input 
-                      type="email" 
-                      required 
+                    <input
+                      type="email"
+                      required
                       value={regForm.email}
                       onChange={(e) => setRegForm({ ...regForm, email: e.target.value })}
-                      className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm" 
-                      placeholder="admin@hospital.com" 
+                      className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
+                      placeholder="admin@hospital.com"
                     />
                   </div>
                 </div>
@@ -241,29 +240,29 @@ export default function HospitalLogin() {
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <Lock className="h-5 w-5 text-gray-400" />
                     </div>
-                    <input 
-                      type="password" 
-                      required 
+                    <input
+                      type="password"
+                      required
                       value={regForm.password}
                       onChange={(e) => setRegForm({ ...regForm, password: e.target.value })}
-                      className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm" 
-                      placeholder="••••••••" 
+                      className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
+                      placeholder="••••••••"
                     />
                   </div>
                 </div>
 
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={loading}
                   className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-colors mt-2 disabled:opacity-50"
                 >
                   {loading ? 'Registering...' : 'Register Hospital & Open Dashboard'}
                 </button>
-                
+
                 <div className="text-center mt-4">
-                  <button 
-                    type="button" 
-                    onClick={() => { setIsRegistering(false); setError(''); }} 
+                  <button
+                    type="button"
+                    onClick={() => { setIsRegistering(false); setError(''); }}
                     className="text-sm text-brand-600 hover:text-brand-500 font-medium"
                   >
                     Already have an account? Log In
@@ -271,7 +270,7 @@ export default function HospitalLogin() {
                 </div>
               </motion.form>
             ) : (
-              /* Regular Login Form */
+
               <motion.form
                 key={activeTab + "-login"}
                 initial={{ opacity: 0, x: 10 }}
@@ -281,7 +280,7 @@ export default function HospitalLogin() {
                 className="space-y-5"
                 onSubmit={handleLoginSubmit}
               >
-                
+
                 {activeTab === 'admin' && (
                   <>
                     <div>
@@ -290,13 +289,13 @@ export default function HospitalLogin() {
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                           <Building2 className="h-5 w-5 text-gray-400" />
                         </div>
-                        <input 
-                          type="text" 
-                          required 
+                        <input
+                          type="text"
+                          required
                           value={adminForm.name}
                           onChange={(e) => setAdminForm({ ...adminForm, name: e.target.value })}
-                          className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm" 
-                          placeholder="e.g. City General Hospital or admin email" 
+                          className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
+                          placeholder="e.g. City General Hospital or admin email"
                         />
                       </div>
                     </div>
@@ -306,12 +305,12 @@ export default function HospitalLogin() {
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                           <FileText className="h-5 w-5 text-gray-400" />
                         </div>
-                        <input 
-                          type="text" 
+                        <input
+                          type="text"
                           value={adminForm.registration_no}
                           onChange={(e) => setAdminForm({ ...adminForm, registration_no: e.target.value })}
-                          className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm" 
-                          placeholder="Registration ID (optional)" 
+                          className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
+                          placeholder="Registration ID (optional)"
                         />
                       </div>
                     </div>
@@ -327,13 +326,13 @@ export default function HospitalLogin() {
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         {activeTab === 'doctor' ? <Stethoscope className="h-5 w-5 text-gray-400" /> : <UserCircle className="h-5 w-5 text-gray-400" />}
                       </div>
-                      <input 
-                        type="text" 
-                        required 
+                      <input
+                        type="text"
+                        required
                         value={staffForm.email}
                         onChange={(e) => setStaffForm({ ...staffForm, email: e.target.value })}
-                        className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm" 
-                        placeholder={activeTab === 'doctor' ? "e.g. dr.sharma@hospital.com or 9876543210" : "e.g. staff@hospital.com or 9811223344"} 
+                        className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
+                        placeholder={activeTab === 'doctor' ? "e.g. dr.sharma@hospital.com or 9876543210" : "e.g. staff@hospital.com or 9811223344"}
                       />
                     </div>
                   </div>
@@ -352,21 +351,21 @@ export default function HospitalLogin() {
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <Lock className="h-5 w-5 text-gray-400" />
                     </div>
-                    <input 
-                      type="password" 
-                      required 
+                    <input
+                      type="password"
+                      required
                       value={activeTab === 'admin' ? adminForm.password : staffForm.password}
                       onChange={(e) => {
                         if (activeTab === 'admin') setAdminForm({ ...adminForm, password: e.target.value });
                         else setStaffForm({ ...staffForm, password: e.target.value });
                       }}
-                      className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm" 
-                      placeholder="••••••••" 
+                      className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
+                      placeholder="••••••••"
                     />
                   </div>
                   {activeTab !== 'admin' && (
                     <p className="text-xs text-gray-500 mt-1.5 flex items-center">
-                      <Key className="w-3 h-3 mr-1 text-gray-400" /> 
+                      <Key className="w-3 h-3 mr-1 text-gray-400" />
                       Set by Hospital Admin. Default: <b>{activeTab === 'doctor' ? 'Doctor@123' : 'Reception@123'}</b>
                     </p>
                   )}
@@ -379,21 +378,21 @@ export default function HospitalLogin() {
                   </div>
                 </div>
 
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={loading}
                   className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-colors mt-2 disabled:opacity-50"
                 >
                   {loading ? 'Signing in...' : `Sign in as ${tabs.find(t=>t.id===activeTab)?.label || 'User'}`}
                 </button>
-                
+
                 {activeTab === 'admin' && (
                   <div className="text-center mt-4 pt-4 border-t border-gray-100">
                     <p className="text-sm text-gray-500">
                       New Hospital?{' '}
-                      <button 
-                        type="button" 
-                        onClick={() => { setIsRegistering(true); setError(''); }} 
+                      <button
+                        type="button"
+                        onClick={() => { setIsRegistering(true); setError(''); }}
                         className="font-medium text-brand-600 hover:text-brand-500"
                       >
                         Register Here
@@ -407,7 +406,7 @@ export default function HospitalLogin() {
         </div>
       </motion.div>
 
-      {/* Dotted border Demo Credentials Box */}
+      {}
       <DemoCredentialsSideBox onAutoFill={handleAutoFill} currentTab={activeTab} />
     </div>
   </div>

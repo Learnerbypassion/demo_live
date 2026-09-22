@@ -1,6 +1,3 @@
-/**
- * Hospital registration + doctor/receptionist management + all role logins (MongoDB/Mongoose).
- */
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const { Hospital, Doctor, Receptionist, Patient } = require("../db");
@@ -11,7 +8,6 @@ const router = express.Router();
 const SALT_ROUNDS = 10;
 const phoneOtps = new Map();
 
-// ---------- Register hospital ----------
 router.post("/hospital/register", async (req, res) => {
   try {
     const { name, registration_no, hospital_type, phone, email, city, state, pin_code, address, hfr_id, password } = req.body;
@@ -33,7 +29,6 @@ router.post("/hospital/register", async (req, res) => {
   }
 });
 
-// ---------- Hospital Login ----------
 router.post("/hospital/login", async (req, res) => {
   try {
     const { email, name, password } = req.body;
@@ -56,7 +51,6 @@ router.post("/hospital/login", async (req, res) => {
   }
 });
 
-// ---------- Doctor Management ----------
 router.post("/doctors", requireAuth, requireRole("hospital_admin"), async (req, res) => {
   try {
     const { name, phone, license, education, specialization, medical_stream, hpr_id, aadhar_id, dob, address, doctor_type, email, password } = req.body;
@@ -151,7 +145,6 @@ router.get("/doctors", async (req, res) => {
   }
 });
 
-// Update / Reset Doctor Password
 router.patch("/doctors/:id/password", requireAuth, requireRole("hospital_admin"), async (req, res) => {
   try {
     const { password } = req.body;
@@ -184,7 +177,6 @@ router.delete("/doctors/:id", requireAuth, requireRole("hospital_admin"), async 
   }
 });
 
-// ---------- Doctor login (allows Email, Phone, License, or Name) ----------
 router.post("/doctor/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -203,7 +195,7 @@ router.post("/doctor/login", async (req, res) => {
     }
 
     const doctor = await Doctor.findOne({ $or: orConditions, active: true });
-    
+
     const passInput = (password || "").trim();
     const isValidPass = doctor && (
       (doctor.password_hash && bcrypt.compareSync(passInput, doctor.password_hash)) ||
@@ -225,7 +217,6 @@ router.post("/doctor/login", async (req, res) => {
   }
 });
 
-// ---------- Receptionist Management ----------
 router.post("/receptionists", requireAuth, requireRole("hospital_admin"), async (req, res) => {
   try {
     const { name, phone, email, password } = req.body;
@@ -279,7 +270,6 @@ router.get("/receptionists", requireAuth, requireRole("hospital_admin"), async (
   }
 });
 
-// Update / Reset Receptionist Password
 router.patch("/receptionists/:id/password", requireAuth, requireRole("hospital_admin"), async (req, res) => {
   try {
     const { password } = req.body;
@@ -312,7 +302,6 @@ router.delete("/receptionists/:id", requireAuth, requireRole("hospital_admin"), 
   }
 });
 
-// ---------- Receptionist login (Email, Phone, or Name) ----------
 router.post("/receptionist/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -328,7 +317,7 @@ router.post("/receptionist/login", async (req, res) => {
     }
 
     const rec = await Receptionist.findOne({ $or: orConditions, active: true });
-    
+
     const passInput = (password || "").trim();
     const isValidPass = rec && (
       (rec.password_hash && bcrypt.compareSync(passInput, rec.password_hash)) ||
@@ -348,12 +337,11 @@ router.post("/receptionist/login", async (req, res) => {
   }
 });
 
-// ---------- Patient OTP Login (patient portal / kiosk) ----------
 router.post("/patient/send-otp", (req, res) => {
   const { phone } = req.body;
   if (!phone) return res.status(400).json({ error: "Phone number is required" });
   const cleanPhone = phone.replace(/[^0-9]/g, "").slice(-10);
-  const otp = "123456"; // Standard demo OTP
+  const otp = "123456";
   phoneOtps.set(cleanPhone, { otp, expiresAt: Date.now() + 10 * 60 * 1000 });
   res.json({ ok: true, message: `OTP sent to +91 ${cleanPhone}`, demoOtp: otp });
 });
@@ -389,7 +377,6 @@ router.post("/patient/verify-otp", async (req, res) => {
   }
 });
 
-// ---------- Patient password login (legacy fallback) ----------
 router.post("/patient/login", async (req, res) => {
   try {
     const { phone, password } = req.body;
@@ -405,7 +392,6 @@ router.post("/patient/login", async (req, res) => {
   }
 });
 
-// ---------- Patient Kiosk Check-In (ABHA ID or Phone) ----------
 router.post("/patient/kiosk-checkin", async (req, res) => {
   try {
     const { abha_id, phone, hospital_id: reqHospitalId, kiosk_id, abha_demographics } = req.body;
@@ -418,7 +404,6 @@ router.post("/patient/kiosk-checkin", async (req, res) => {
       patient = await Patient.findOne({ phone: new RegExp(cleanPhone + "$") });
     }
 
-    // Resolve active hospital for this kiosk
     let assignedHospId = reqHospitalId;
     if (!assignedHospId || assignedHospId === "independent" || assignedHospId === "default") {
       const firstHosp = await Hospital.findOne();
@@ -426,7 +411,7 @@ router.post("/patient/kiosk-checkin", async (req, res) => {
     }
 
     if (patient) {
-      // If ABHA registry returned fresh demographics, update the DB record
+
       const updates = {};
       if (abha_demographics?.name && abha_demographics.name !== patient.name) updates.name = abha_demographics.name;
       if (abha_demographics?.dob && !patient.dob) updates.dob = abha_demographics.dob;
@@ -434,13 +419,13 @@ router.post("/patient/kiosk-checkin", async (req, res) => {
       if (abha_demographics?.gender && !patient.gender) updates.gender = abha_demographics.gender;
       if (abha_demographics?.address && !patient.address) updates.address = abha_demographics.address;
       if ((abha_id || abha_demographics?.abha_id) && (!patient.abha_id || patient.abha_id === "12-3456-7890-1234")) updates.abha_id = abha_id || abha_demographics?.abha_id;
-      // Adopt patient to this kiosk's hospital for this visit!
+
       if (assignedHospId && assignedHospId !== "default") updates.hospital_id = assignedHospId;
       if (Object.keys(updates).length > 0) {
         patient = await Patient.findByIdAndUpdate(patient.id, updates, { new: true });
       }
     } else {
-      // New walk-in kiosk patient
+
       const digits = phone ? phone.replace(/[^0-9]/g, "").slice(-10) : "";
       const cleanPhone = digits.length >= 10 ? digits : "9876543210";
       const abhaVal = abha_id || abha_demographics?.abha_id || null;
@@ -471,7 +456,6 @@ router.post("/patient/kiosk-checkin", async (req, res) => {
   }
 });
 
-// ---------- ABHA Lookup (Mock Registry) ----------
 router.get("/abha/lookup", async (req, res) => {
   try {
     const { abha_id, phone } = req.query;
@@ -479,7 +463,6 @@ router.get("/abha/lookup", async (req, res) => {
       return res.status(400).json({ error: "abha_id or phone is required" });
     }
 
-    // 1. Check real DB first (patient may already be registered)
     let dbPatient = null;
     if (abha_id) {
       dbPatient = await Patient.findOne({ abha_id: abha_id.trim() });
@@ -505,13 +488,11 @@ router.get("/abha/lookup", async (req, res) => {
       });
     }
 
-    // 2. Check mock ABHA registry
     const abhaRecord = await lookupAbha({ abha_id, phone });
     if (abhaRecord) {
       return res.json({ found: true, source: "mock_registry", patient: abhaRecord });
     }
 
-    // 3. Not found — new patient
     return res.json({ found: false, patient: null });
   } catch (err) {
     res.status(500).json({ error: err.message || "ABHA lookup failed" });

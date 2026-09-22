@@ -1,8 +1,3 @@
-/**
- * Comprehensive Indian Language Localization for MediKiosk KioskFlow
- * Supports: English, Hindi, Bengali, Tamil, Telugu, Marathi, Gujarati, Kannada
- */
-
 export const UI_TRANSLATIONS = {
   English: {
     customDiseasePlaceholder: 'Or type any custom disease / symptom (e.g. Ear pain, Dengue, Dental)...',
@@ -979,11 +974,9 @@ export function getTranslation(key, lang = 'English', ...args) {
   return text;
 }
 
-
 export function getQuestionOptions(questionText = "", lang = "English", englishText = "") {
   const combined = ((englishText || "") + " " + (questionText || "")).toLowerCase();
 
-  // 1. Scale / Rating Question (1 to 10 or 0 to 9) - ALWAYS universal digits
   const isScale = /(1\s*(to|-|থেকে|সে|వరకు|முதல்|ते|थी|ವರೆಗೆ)\s*10)|(0\s*(to|-|থেকে|সে|వరకు|முதல்|ते|थी|ವರೆಗೆ)\s*(9|10))|scale|rating|severity|rate your|স্কেল|স্কেলে|স্কেলের|তীব্রতা|तीव्रता|पैमाने/i.test(combined);
   if (isScale) {
     const isZeroToNine = /(0\s*(to|-|থেকে|সে|వరకు|முதல்|ते|थी|ವರೆಗೆ)\s*9)/i.test(combined);
@@ -1000,8 +993,6 @@ export function getQuestionOptions(questionText = "", lang = "English", englishT
     };
   }
 
-  // 2. Duration / Onset / Start Timing Question (MUST be checked before symptoms/medication)
-  // e.g. "When did your fever start?", "How long have you had this?", "কখন শুরু হয়েছিল?", "কবে থেকে?"
   const isExplicitYesNoStart = /^(did|does|is|are|was|were|have|has)\b/i.test((englishText || questionText).trim());
   const isDuration = (/when did|when was|how long|since when|duration|onset|কবে|কখন|কয়দিন|কত দিন|কতদিন|কবে থেকে|কখন থেকে|কখন শুরু|কবে শুরু|कब से|कितने दिन|कितने समय|कब शुरू/i.test(combined) || (/start|started|begin|began/i.test(combined) && !isExplicitYesNoStart));
   if (isDuration) {
@@ -1069,7 +1060,6 @@ export function getQuestionOptions(questionText = "", lang = "English", englishT
     };
   }
 
-  // 3. Trigger / Worsening / Relieving Factors
   const isTrigger = /worse|better|relieve|relieves|trigger|triggers|aggravat|mitigat|খারাপ|কমাতে|সাহায্য|বাড়ে|কমে|बढ़ता|घटता|कम|आराम/i.test(combined);
   if (isTrigger) {
     const triggerMap = {
@@ -1131,7 +1121,6 @@ export function getQuestionOptions(questionText = "", lang = "English", englishT
     };
   }
 
-  // 4. Medication Question (Has the patient taken any medicine/tablets/remedies)
   const isMedication = /medicat|medicine|tablet|drug|prescrib|remed|ওষুধ|ঔষধ|দवा|दवाई|மருந்து|మందు|औषध|દવા|ಔಷಧ/i.test(combined);
   if (isMedication) {
     const medMap = {
@@ -1190,7 +1179,6 @@ export function getQuestionOptions(questionText = "", lang = "English", englishT
     };
   }
 
-  // 5. Associated / Other Accompanying Symptoms (checks for "other" or "associated" symptoms)
   const isSymptoms = /any other symptom|associated symptom|other associated|also have|along with|do you also|अन्य लक्षण|और कोई लक्षण|অন্যান্য লক্ষণ|অন্য কোনো উপসর্গ|অন্য উপসর্গ/i.test(combined);
   if (isSymptoms) {
     const sympMap = {
@@ -1249,7 +1237,6 @@ export function getQuestionOptions(questionText = "", lang = "English", englishT
     };
   }
 
-  // 6. Yes / No or Binary Verification
   const isYesNo = /is there|have you|did you|do you|any|কি|কিনা|হ্যাঁ|না|नাকি|क्या|हाँ|नहीं/i.test(combined);
   if (isYesNo) {
     const ynMap = {
@@ -1308,7 +1295,6 @@ export function getQuestionOptions(questionText = "", lang = "English", englishT
     };
   }
 
-  // 7. Universal Fallback
   const defaultMap = {
     Hindi: [
       { label: "हाँ", tone: "green", icon: "✓" },
@@ -1334,7 +1320,6 @@ export function getQuestionOptions(questionText = "", lang = "English", englishT
     options: defaultMap[lang] || defaultMap.English
   };
 }
-
 
 export const AYUSH_TRANSLATIONS = {
   prakriti: {

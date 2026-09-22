@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
+import {
   PhoneCall, MessageSquare, ShieldCheck, LogOut, Users, Building, Trash2, PlusCircle, Monitor,
   Stethoscope, KeyRound, Eye, EyeOff, CheckCircle2, Lock, AlertCircle,
   Sliders, ArrowUp, ArrowDown, Layers, HelpCircle, Sparkles
@@ -8,7 +8,6 @@ import {
 import { useGlobal } from '../context/GlobalContext';
 import { getStoredUser } from '../services/api';
 import { api } from '../services/api';
-
 
 const ALLOPATHY_SPECIALIZATIONS = [
   "General Medicine",
@@ -76,9 +75,8 @@ export default function AdminDashboard() {
     });
   };
 
-  const [activeTab, setActiveTab] = useState('doctors'); // 'doctors' | 'receptionists' | 'decision_trees'
+  const [activeTab, setActiveTab] = useState('doctors');
 
-  // Decision Tree States
   const [decisionTrees, setDecisionTrees] = useState([]);
   const [dtLoading, setDtLoading] = useState(false);
   const [dtSaving, setDtSaving] = useState(false);
@@ -94,8 +92,7 @@ export default function AdminDashboard() {
 
   const hospitalId = storedUser?.hospital_id || storedUser?.id || '';
 
-  // Queue Notification States
-  const [notifMode, setNotifMode] = useState('call'); // 'call' | 'sms'
+  const [notifMode, setNotifMode] = useState('call');
   const [notifThreshold, setNotifThreshold] = useState(1);
   const [notifTemplate, setNotifTemplate] = useState("This is an automated call from {hospital_name}. Your consultation with Dr. {doctor_name} is next. Please proceed to the waiting area.");
   const [notifLoading, setNotifLoading] = useState(false);
@@ -141,7 +138,6 @@ export default function AdminDashboard() {
       setNotifSaving(false);
     }
   };
-
 
   const loadDecisionTrees = React.useCallback(async () => {
     if (!hospitalId) return;
@@ -269,10 +265,9 @@ export default function AdminDashboard() {
   const [successMsg, setSuccessMsg] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  // Password reset modal state
   const [resetModal, setResetModal] = useState({
     isOpen: false,
-    staffType: 'doctor', // 'doctor' | 'receptionist'
+    staffType: 'doctor',
     id: null,
     name: '',
     newPassword: '',
@@ -280,25 +275,24 @@ export default function AdminDashboard() {
     msg: ''
   });
 
-  // Form states with initial password field
-  const [docForm, setDocForm] = useState({ 
-    name: '', 
-    phone: '', 
-    email: '', 
-    license: '', 
-    medical_stream: 'Allopathy', // 'Allopathy' | 'AYUSH'
+  const [docForm, setDocForm] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    license: '',
+    medical_stream: 'Allopathy',
     specializationSelect: 'General Medicine',
     specializationCustom: '',
     educationSelect: 'MBBS',
     educationCustom: '',
-    password: 'Doctor@123' 
+    password: 'Doctor@123'
   });
-  
-  const [recForm, setRecForm] = useState({ 
-    name: '', 
-    phone: '', 
-    email: '', 
-    password: 'Reception@123' 
+
+  const [recForm, setRecForm] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    password: 'Reception@123'
   });
 
   const handleAddDoctor = async (e) => {
@@ -306,7 +300,7 @@ export default function AdminDashboard() {
     setIsSubmitting(true);
     setSuccessMsg('');
     try {
-      const finalSpecialization = docForm.specializationSelect === 'Other (Specify)' 
+      const finalSpecialization = docForm.specializationSelect === 'Other (Specify)'
         ? (docForm.specializationCustom.trim() || 'General Medicine')
         : docForm.specializationSelect;
 
@@ -328,17 +322,17 @@ export default function AdminDashboard() {
 
       const res = await addDoctor(payload);
       setSuccessMsg(`Doctor ${docForm.name} registered successfully! Login Password: ${docForm.password || 'Doctor@123'}`);
-      setDocForm({ 
-        name: '', 
-        phone: '', 
-        email: '', 
-        license: '', 
+      setDocForm({
+        name: '',
+        phone: '',
+        email: '',
+        license: '',
         medical_stream: 'Allopathy',
         specializationSelect: 'General Medicine',
         specializationCustom: '',
         educationSelect: 'MBBS',
         educationCustom: '',
-        password: 'Doctor@123' 
+        password: 'Doctor@123'
       });
       setTimeout(() => setSuccessMsg(''), 8000);
     } catch (err) {
@@ -355,11 +349,11 @@ export default function AdminDashboard() {
     try {
       const res = await addReceptionist(recForm);
       setSuccessMsg(`Receptionist ${recForm.name} registered successfully! Login Password: ${recForm.password || 'Reception@123'}`);
-      setRecForm({ 
-        name: '', 
-        phone: '', 
-        email: '', 
-        password: 'Reception@123' 
+      setRecForm({
+        name: '',
+        phone: '',
+        email: '',
+        password: 'Reception@123'
       });
       setTimeout(() => setSuccessMsg(''), 8000);
     } catch (err) {
@@ -410,7 +404,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
-      {/* Sidebar / Top Navigation for Mobile */}
+      {}
       <div className="w-full md:w-64 bg-brand-900 text-white flex flex-col shadow-xl shrink-0">
         <div className="p-4 sm:p-6 flex items-center justify-between border-b border-brand-800">
           <div className="flex items-center">
@@ -425,26 +419,26 @@ export default function AdminDashboard() {
           </button>
         </div>
         <nav className="p-2 sm:p-4 flex md:flex-col gap-1.5 sm:gap-2 overflow-x-auto md:overflow-visible">
-          <button 
-            onClick={() => { setActiveTab('doctors'); setSuccessMsg(''); }} 
+          <button
+            onClick={() => { setActiveTab('doctors'); setSuccessMsg(''); }}
             className={`flex items-center px-3 sm:px-4 py-2 sm:py-3 rounded-xl font-medium transition-all whitespace-nowrap text-xs sm:text-sm ${activeTab === 'doctors' ? 'bg-brand-800 text-white shadow-sm' : 'text-brand-100 hover:bg-brand-800/50'}`}
           >
             <Stethoscope className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 shrink-0" /> Manage Doctors
           </button>
-          <button 
-            onClick={() => { setActiveTab('receptionists'); setSuccessMsg(''); }} 
+          <button
+            onClick={() => { setActiveTab('receptionists'); setSuccessMsg(''); }}
             className={`flex items-center px-3 sm:px-4 py-2 sm:py-3 rounded-xl font-medium transition-all whitespace-nowrap text-xs sm:text-sm ${activeTab === 'receptionists' ? 'bg-brand-800 text-white shadow-sm' : 'text-brand-100 hover:bg-brand-800/50'}`}
           >
             <Users className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 shrink-0" /> Manage Reception
           </button>
-          <button 
-            onClick={() => { setActiveTab('decision_trees'); setSuccessMsg(''); }} 
+          <button
+            onClick={() => { setActiveTab('decision_trees'); setSuccessMsg(''); }}
             className={`flex items-center px-3 sm:px-4 py-2 sm:py-3 rounded-xl font-medium transition-all whitespace-nowrap text-xs sm:text-sm ${activeTab === 'decision_trees' ? 'bg-brand-800 text-white shadow-sm' : 'text-brand-100 hover:bg-brand-800/50'}`}
           >
             <Sliders className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 shrink-0" /> Question Parameters
           </button>
-          <button 
-            onClick={() => { setActiveTab('notifications'); setSuccessMsg(''); }} 
+          <button
+            onClick={() => { setActiveTab('notifications'); setSuccessMsg(''); }}
             className={`flex items-center px-3 sm:px-4 py-2 sm:py-3 rounded-xl font-medium transition-all whitespace-nowrap text-xs sm:text-sm ${activeTab === 'notifications' ? 'bg-brand-800 text-white shadow-sm' : 'text-brand-100 hover:bg-brand-800/50'}`}
           >
             <PhoneCall className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 shrink-0" /> Queue Notifications
@@ -463,7 +457,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Main Content */}
+      {}
       <div className="flex-1 p-4 sm:p-8 overflow-y-auto">
         <div className="flex flex-col md:flex-row md:items-center justify-between pb-4 sm:pb-6 border-b border-gray-200 mb-4 sm:mb-6 gap-3">
           <div>
@@ -484,15 +478,15 @@ export default function AdminDashboard() {
           )}
         </div>
 
-        {/* Global Success Banner */}
+        {}
         {successMsg && (
           <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl flex items-center shadow-sm animate-fade-in">
             <CheckCircle2 className="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" />
             <span className="text-sm font-medium">{successMsg}</span>
           </div>
         )}
-        
-        {/* Stats */}
+
+        {}
         {activeTab !== 'decision_trees' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between">
@@ -550,7 +544,7 @@ export default function AdminDashboard() {
 
         {activeTab === 'doctors' && (
           <div className="space-y-8">
-            {/* Add Doctor Form */}
+            {}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
               <div className="mb-4">
                 <h2 className="text-xl font-bold text-gray-900 flex items-center">
@@ -562,24 +556,24 @@ export default function AdminDashboard() {
               </div>
 
               <form onSubmit={handleAddDoctor} className="space-y-4">
-                {/* System / Stream Selector: Allopathy vs AYUSH */}
+                {}
                 <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
                   <label className="block text-xs font-bold text-gray-800 uppercase tracking-wider mb-2">
                     Medical System / Practice Stream *
                   </label>
                   <div className="flex flex-wrap gap-3">
                     <label className={`flex items-center space-x-2.5 px-4 py-2.5 rounded-xl border-2 cursor-pointer transition-all ${
-                      docForm.medical_stream === 'Allopathy' 
-                        ? 'border-indigo-600 bg-indigo-50/80 text-indigo-950 font-bold shadow-2xs' 
+                      docForm.medical_stream === 'Allopathy'
+                        ? 'border-indigo-600 bg-indigo-50/80 text-indigo-950 font-bold shadow-2xs'
                         : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
                     }`}>
-                      <input 
-                        type="radio" 
-                        name="medical_stream" 
-                        value="Allopathy" 
-                        checked={docForm.medical_stream === 'Allopathy'} 
-                        onChange={() => setDocForm(p => ({ 
-                          ...p, 
+                      <input
+                        type="radio"
+                        name="medical_stream"
+                        value="Allopathy"
+                        checked={docForm.medical_stream === 'Allopathy'}
+                        onChange={() => setDocForm(p => ({
+                          ...p,
                           medical_stream: 'Allopathy',
                           specializationSelect: 'General Medicine',
                           educationSelect: 'MBBS'
@@ -590,17 +584,17 @@ export default function AdminDashboard() {
                     </label>
 
                     <label className={`flex items-center space-x-2.5 px-4 py-2.5 rounded-xl border-2 cursor-pointer transition-all ${
-                      docForm.medical_stream === 'AYUSH' 
-                        ? 'border-emerald-600 bg-emerald-50/80 text-emerald-950 font-bold shadow-2xs' 
+                      docForm.medical_stream === 'AYUSH'
+                        ? 'border-emerald-600 bg-emerald-50/80 text-emerald-950 font-bold shadow-2xs'
                         : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
                     }`}>
-                      <input 
-                        type="radio" 
-                        name="medical_stream" 
-                        value="AYUSH" 
-                        checked={docForm.medical_stream === 'AYUSH'} 
-                        onChange={() => setDocForm(p => ({ 
-                          ...p, 
+                      <input
+                        type="radio"
+                        name="medical_stream"
+                        value="AYUSH"
+                        checked={docForm.medical_stream === 'AYUSH'}
+                        onChange={() => setDocForm(p => ({
+                          ...p,
                           medical_stream: 'AYUSH',
                           specializationSelect: 'Ayurveda - Kayachikitsa (Internal Medicine)',
                           educationSelect: 'BAMS (Bachelor of Ayurvedic Medicine & Surgery)'
@@ -615,43 +609,43 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">Doctor Full Name *</label>
-                    <input 
-                      required 
-                      type="text" 
-                      placeholder="e.g. Dr. Rajesh Sharma" 
-                      value={docForm.name} 
-                      onChange={e=>setDocForm({...docForm, name: e.target.value})} 
-                      className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500" 
+                    <input
+                      required
+                      type="text"
+                      placeholder="e.g. Dr. Rajesh Sharma"
+                      value={docForm.name}
+                      onChange={e=>setDocForm({...docForm, name: e.target.value})}
+                      className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                     />
                   </div>
 
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">Mobile Phone Number *</label>
-                    <input 
-                      required 
-                      type="tel" 
-                      placeholder="e.g. 9876543210" 
-                      value={docForm.phone} 
-                      onChange={e=>setDocForm({...docForm, phone: e.target.value})} 
-                      className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500" 
+                    <input
+                      required
+                      type="tel"
+                      placeholder="e.g. 9876543210"
+                      value={docForm.phone}
+                      onChange={e=>setDocForm({...docForm, phone: e.target.value})}
+                      className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                     />
                   </div>
 
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">Doctor Email (Optional)</label>
-                    <input 
-                      type="email" 
-                      placeholder="e.g. dr.sharma@hospital.com" 
-                      value={docForm.email} 
-                      onChange={e=>setDocForm({...docForm, email: e.target.value})} 
-                      className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500" 
+                    <input
+                      type="email"
+                      placeholder="e.g. dr.sharma@hospital.com"
+                      value={docForm.email}
+                      onChange={e=>setDocForm({...docForm, email: e.target.value})}
+                      className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                     />
                   </div>
 
-                  {/* Specialization Dropdown + Other write-in */}
+                  {}
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">Specialization *</label>
-                    <select 
+                    <select
                       required
                       value={docForm.specializationSelect}
                       onChange={e=>setDocForm({...docForm, specializationSelect: e.target.value})}
@@ -663,33 +657,33 @@ export default function AdminDashboard() {
                     </select>
 
                     {docForm.specializationSelect === 'Other (Specify)' && (
-                      <input 
-                        type="text" 
-                        required 
-                        placeholder="Specify Custom Specialization *" 
-                        value={docForm.specializationCustom} 
-                        onChange={e=>setDocForm({...docForm, specializationCustom: e.target.value})} 
-                        className="w-full mt-2 p-2 border border-brand-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 bg-brand-50/20" 
+                      <input
+                        type="text"
+                        required
+                        placeholder="Specify Custom Specialization *"
+                        value={docForm.specializationCustom}
+                        onChange={e=>setDocForm({...docForm, specializationCustom: e.target.value})}
+                        className="w-full mt-2 p-2 border border-brand-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 bg-brand-50/20"
                       />
                     )}
                   </div>
 
-                  {/* Medical License */}
+                  {}
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">Medical License / HPR ID</label>
-                    <input 
-                      type="text" 
-                      placeholder="e.g. MCI-123456 / HPR-IND-902" 
-                      value={docForm.license} 
-                      onChange={e=>setDocForm({...docForm, license: e.target.value})} 
-                      className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500" 
+                    <input
+                      type="text"
+                      placeholder="e.g. MCI-123456 / HPR-IND-902"
+                      value={docForm.license}
+                      onChange={e=>setDocForm({...docForm, license: e.target.value})}
+                      className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                     />
                   </div>
 
-                  {/* Education Dropdown + Other write-in */}
+                  {}
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">Education / Degree</label>
-                    <select 
+                    <select
                       value={docForm.educationSelect}
                       onChange={e=>setDocForm({...docForm, educationSelect: e.target.value})}
                       className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 bg-white"
@@ -700,19 +694,19 @@ export default function AdminDashboard() {
                     </select>
 
                     {docForm.educationSelect === 'Other (Specify)' && (
-                      <input 
-                        type="text" 
-                        required 
-                        placeholder="Specify Custom Degree / Education *" 
-                        value={docForm.educationCustom} 
-                        onChange={e=>setDocForm({...docForm, educationCustom: e.target.value})} 
-                        className="w-full mt-2 p-2 border border-brand-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 bg-brand-50/20" 
+                      <input
+                        type="text"
+                        required
+                        placeholder="Specify Custom Degree / Education *"
+                        value={docForm.educationCustom}
+                        onChange={e=>setDocForm({...docForm, educationCustom: e.target.value})}
+                        className="w-full mt-2 p-2 border border-brand-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 bg-brand-50/20"
                       />
                     )}
                   </div>
                 </div>
 
-                {/* Password input section */}
+                {}
                 <div className="bg-amber-50/60 border border-amber-200/80 rounded-xl p-4">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex-1">
@@ -720,17 +714,17 @@ export default function AdminDashboard() {
                         <Lock className="w-3.5 h-3.5 mr-1 text-amber-700" /> Set Initial Login Password for Doctor
                       </label>
                       <div className="relative max-w-md">
-                        <input 
-                          type={showPassword ? "text" : "password"} 
+                        <input
+                          type={showPassword ? "text" : "password"}
                           required
-                          value={docForm.password} 
-                          onChange={e=>setDocForm({...docForm, password: e.target.value})} 
-                          className="w-full p-2.5 pr-10 border border-amber-300 rounded-lg text-sm bg-white font-mono focus:ring-2 focus:ring-amber-500 focus:border-amber-500" 
+                          value={docForm.password}
+                          onChange={e=>setDocForm({...docForm, password: e.target.value})}
+                          className="w-full p-2.5 pr-10 border border-amber-300 rounded-lg text-sm bg-white font-mono focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                           placeholder="e.g. Doctor@123"
                         />
-                        <button 
-                          type="button" 
-                          onClick={() => setShowPassword(!showPassword)} 
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
                           className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                         >
                           {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -742,9 +736,9 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="flex items-end">
-                      <button 
-                        type="submit" 
-                        disabled={isSubmitting} 
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
                         className="w-full md:w-auto px-6 py-2.5 bg-brand-600 text-white font-semibold rounded-lg hover:bg-brand-700 shadow-sm disabled:opacity-50 transition-colors"
                       >
                         {isSubmitting ? 'Registering Doctor...' : 'Save & Register Doctor'}
@@ -754,8 +748,8 @@ export default function AdminDashboard() {
                 </div>
               </form>
             </div>
-            
-            {/* Doctors List */}
+
+            {}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                 <h3 className="font-bold text-gray-900">Hospital Doctors Directory ({doctors.length})</h3>
@@ -804,19 +798,19 @@ export default function AdminDashboard() {
                           <div className="text-xs text-gray-500 font-mono mt-0.5">✉️ {doc.email}</div>
                         </td>
                         <td className="px-6 py-4 text-right space-x-2">
-                          <button 
-                            onClick={() => openResetPasswordModal('doctor', doc)} 
+                          <button
+                            onClick={() => openResetPasswordModal('doctor', doc)}
                             className="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors border border-amber-200"
                             title="Set or reset login password"
                           >
                             <KeyRound className="w-3.5 h-3.5 mr-1.5" /> Set Password
                           </button>
-                          <button 
+                          <button
                             onClick={() => {
                               if (confirm(`Are you sure you want to remove ${doc.name}?`)) {
                                 deleteDoctor(doc.id || doc._id);
                               }
-                            }} 
+                            }}
                             className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors inline-block"
                             title="Delete doctor"
                           >
@@ -834,7 +828,7 @@ export default function AdminDashboard() {
 
         {activeTab === 'receptionists' && (
           <div className="space-y-8">
-            {/* Add Receptionist Form */}
+            {}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
               <div className="mb-4">
                 <h2 className="text-xl font-bold text-gray-900 flex items-center">
@@ -849,41 +843,41 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">Staff Full Name *</label>
-                    <input 
-                      required 
-                      type="text" 
-                      placeholder="e.g. Ramesh Verma" 
-                      value={recForm.name} 
-                      onChange={e=>setRecForm({...recForm, name: e.target.value})} 
-                      className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500" 
+                    <input
+                      required
+                      type="text"
+                      placeholder="e.g. Ramesh Verma"
+                      value={recForm.name}
+                      onChange={e=>setRecForm({...recForm, name: e.target.value})}
+                      className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                     />
                   </div>
 
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">Mobile Phone Number *</label>
-                    <input 
-                      required 
-                      type="tel" 
-                      placeholder="e.g. 9811223344" 
-                      value={recForm.phone} 
-                      onChange={e=>setRecForm({...recForm, phone: e.target.value})} 
-                      className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500" 
+                    <input
+                      required
+                      type="tel"
+                      placeholder="e.g. 9811223344"
+                      value={recForm.phone}
+                      onChange={e=>setRecForm({...recForm, phone: e.target.value})}
+                      className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                     />
                   </div>
 
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">Staff Email (Optional)</label>
-                    <input 
-                      type="email" 
-                      placeholder="e.g. staff.ramesh@hospital.com" 
-                      value={recForm.email} 
-                      onChange={e=>setRecForm({...recForm, email: e.target.value})} 
-                      className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500" 
+                    <input
+                      type="email"
+                      placeholder="e.g. staff.ramesh@hospital.com"
+                      value={recForm.email}
+                      onChange={e=>setRecForm({...recForm, email: e.target.value})}
+                      className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                     />
                   </div>
                 </div>
 
-                {/* Password input section */}
+                {}
                 <div className="bg-amber-50/60 border border-amber-200/80 rounded-xl p-4">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex-1">
@@ -891,17 +885,17 @@ export default function AdminDashboard() {
                         <Lock className="w-3.5 h-3.5 mr-1 text-amber-700" /> Set Initial Login Password for Reception Staff
                       </label>
                       <div className="relative max-w-md">
-                        <input 
-                          type={showPassword ? "text" : "password"} 
+                        <input
+                          type={showPassword ? "text" : "password"}
                           required
-                          value={recForm.password} 
-                          onChange={e=>setRecForm({...recForm, password: e.target.value})} 
-                          className="w-full p-2.5 pr-10 border border-amber-300 rounded-lg text-sm bg-white font-mono focus:ring-2 focus:ring-amber-500 focus:border-amber-500" 
+                          value={recForm.password}
+                          onChange={e=>setRecForm({...recForm, password: e.target.value})}
+                          className="w-full p-2.5 pr-10 border border-amber-300 rounded-lg text-sm bg-white font-mono focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                           placeholder="e.g. Reception@123"
                         />
-                        <button 
-                          type="button" 
-                          onClick={() => setShowPassword(!showPassword)} 
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
                           className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                         >
                           {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -913,9 +907,9 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="flex items-end">
-                      <button 
-                        type="submit" 
-                        disabled={isSubmitting} 
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
                         className="w-full md:w-auto px-6 py-2.5 bg-brand-600 text-white font-semibold rounded-lg hover:bg-brand-700 shadow-sm disabled:opacity-50 transition-colors"
                       >
                         {isSubmitting ? 'Registering Staff...' : 'Save & Register Receptionist'}
@@ -925,8 +919,8 @@ export default function AdminDashboard() {
                 </div>
               </form>
             </div>
-            
-            {/* Receptionists List */}
+
+            {}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                 <h3 className="font-bold text-gray-900">Hospital Reception Desk Directory ({receptionists.length})</h3>
@@ -956,19 +950,19 @@ export default function AdminDashboard() {
                           <div className="text-xs text-gray-500 font-mono mt-0.5">✉️ {rec.email}</div>
                         </td>
                         <td className="px-6 py-4 text-right space-x-2">
-                          <button 
-                            onClick={() => openResetPasswordModal('receptionist', rec)} 
+                          <button
+                            onClick={() => openResetPasswordModal('receptionist', rec)}
                             className="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors border border-amber-200"
                             title="Set or reset login password"
                           >
                             <KeyRound className="w-3.5 h-3.5 mr-1.5" /> Set Password
                           </button>
-                          <button 
+                          <button
                             onClick={() => {
                               if (confirm(`Are you sure you want to remove ${rec.name}?`)) {
                                 deleteReceptionist(rec.id || rec._id);
                               }
-                            }} 
+                            }}
                             className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors inline-block"
                             title="Delete receptionist"
                           >
@@ -986,7 +980,7 @@ export default function AdminDashboard() {
 
         {activeTab === 'decision_trees' && (
           <div className="space-y-6">
-            {/* Top Banner Card */}
+            {}
             <div className="bg-gradient-to-r from-brand-900 to-indigo-950 text-white p-6 rounded-2xl shadow-sm border border-brand-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
                 <h2 className="text-2xl font-bold flex items-center">
@@ -1005,7 +999,7 @@ export default function AdminDashboard() {
               </button>
             </div>
 
-            {/* Active Protocols List Card */}
+            {}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-5 border-b border-gray-100 gap-3">
                 <div>
@@ -1095,7 +1089,6 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        
         {activeTab === 'notifications' && (
           <div className="space-y-6 max-w-4xl">
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-6">
@@ -1109,7 +1102,7 @@ export default function AdminDashboard() {
               </div>
 
               <form onSubmit={handleSaveNotifSettings} className="space-y-6">
-                {/* Channel Selector */}
+                {}
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
                     Primary Notification Channel *
@@ -1163,7 +1156,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                {/* Queue Threshold */}
+                {}
                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
                     <label className="block text-xs font-bold text-gray-800 uppercase tracking-wider mb-0.5">
@@ -1186,7 +1179,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                {/* Message Template */}
+                {}
                 <div>
                   <div className="flex justify-between items-center mb-1.5">
                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
@@ -1203,7 +1196,7 @@ export default function AdminDashboard() {
                     placeholder="This is an automated call from {hospital_name}..."
                   />
 
-                  {/* Insertable Tag Chips */}
+                  {}
                   <div className="flex flex-wrap gap-2 mt-2">
                     {[
                       { tag: '{hospital_name}', label: 'Hospital Name' },
@@ -1226,7 +1219,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                {/* Live Preview Box */}
+                {}
                 <div className="bg-indigo-50/60 border border-indigo-200/80 rounded-2xl p-4">
                   <span className="text-xs font-bold uppercase tracking-wider text-indigo-900 block mb-1">
                     Live Simulated Preview ({notifMode === 'call' ? 'Voice Call Script' : 'SMS Text Message'}):
@@ -1253,7 +1246,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* Modal Dialog: Configure Symptom Protocol Builder */}
+        {}
         {isProtocolModalOpen && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-fade-in">
             <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6 border border-gray-100 max-h-[90vh] flex flex-col animate-scale-up">
@@ -1283,7 +1276,7 @@ export default function AdminDashboard() {
               )}
 
               <form onSubmit={handleSaveDecisionTree} className="flex-1 overflow-y-auto pt-4 space-y-4 pr-1">
-                {/* Target Symptom Selector */}
+                {}
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
                     Target Symptom
@@ -1322,7 +1315,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                {/* Parameters List */}
+                {}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">
@@ -1448,17 +1441,17 @@ export default function AdminDashboard() {
           </div>
         )}
 
-                {/* Reset Password Modal */}
+                {}
         {resetModal.isOpen && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-gray-100 animate-scale-up">
               <div className="flex items-center justify-between pb-4 border-b border-gray-100 mb-4">
                 <h3 className="text-lg font-bold text-gray-900 flex items-center">
-                  <KeyRound className="w-5 h-5 text-amber-600 mr-2" /> 
+                  <KeyRound className="w-5 h-5 text-amber-600 mr-2" />
                   Set Password for {resetModal.name}
                 </h3>
-                <button 
-                  onClick={() => setResetModal(prev => ({ ...prev, isOpen: false }))} 
+                <button
+                  onClick={() => setResetModal(prev => ({ ...prev, isOpen: false }))}
                   className="text-gray-400 hover:text-gray-600"
                 >
                   ✕
@@ -1470,12 +1463,12 @@ export default function AdminDashboard() {
                   <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
                     New Initial / Login Password
                   </label>
-                  <input 
-                    type="text" 
-                    required 
-                    value={resetModal.newPassword} 
-                    onChange={e => setResetModal(prev => ({ ...prev, newPassword: e.target.value }))} 
-                    className="w-full p-3 border border-gray-300 rounded-lg font-mono text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500" 
+                  <input
+                    type="text"
+                    required
+                    value={resetModal.newPassword}
+                    onChange={e => setResetModal(prev => ({ ...prev, newPassword: e.target.value }))}
+                    className="w-full p-3 border border-gray-300 rounded-lg font-mono text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                     placeholder="Enter new password"
                   />
                   <p className="text-xs text-gray-500 mt-1">
@@ -1486,9 +1479,9 @@ export default function AdminDashboard() {
                 <div className="flex space-x-2 pt-2">
                   <button
                     type="button"
-                    onClick={() => setResetModal(prev => ({ 
-                      ...prev, 
-                      newPassword: resetModal.staffType === 'doctor' ? 'Doctor@123' : 'Reception@123' 
+                    onClick={() => setResetModal(prev => ({
+                      ...prev,
+                      newPassword: resetModal.staffType === 'doctor' ? 'Doctor@123' : 'Reception@123'
                     }))}
                     className="text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
                   >
@@ -1497,16 +1490,16 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="flex justify-end space-x-3 pt-4 border-t border-gray-100">
-                  <button 
-                    type="button" 
-                    onClick={() => setResetModal(prev => ({ ...prev, isOpen: false }))} 
+                  <button
+                    type="button"
+                    onClick={() => setResetModal(prev => ({ ...prev, isOpen: false }))}
                     className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
                   >
                     Cancel
                   </button>
-                  <button 
-                    type="submit" 
-                    disabled={resetModal.loading} 
+                  <button
+                    type="submit"
+                    disabled={resetModal.loading}
                     className="px-5 py-2 bg-brand-600 text-white rounded-lg text-sm font-semibold hover:bg-brand-700 disabled:opacity-50"
                   >
                     {resetModal.loading ? 'Updating...' : 'Save Password'}

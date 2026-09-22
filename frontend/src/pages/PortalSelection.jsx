@@ -9,13 +9,13 @@ export default function PortalSelection() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 sm:p-6 relative">
-      {/* GitHub Repo Button */}
+      {}
       <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20">
         <RepoButton />
       </div>
       <div className="max-w-6xl w-full py-4 sm:py-0">
-        {/* Header Section */}
-        <motion.div 
+        {}
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -34,9 +34,9 @@ export default function PortalSelection() {
           </p>
         </motion.div>
 
-        {/* Selection Cards */}
+        {}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto">
-          {/* Patient Kiosk Card */}
+          {}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -61,7 +61,7 @@ export default function PortalSelection() {
             </div>
           </motion.div>
 
-          {/* Patient Portal Card */}
+          {}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -86,7 +86,7 @@ export default function PortalSelection() {
             </div>
           </motion.div>
 
-          {/* Hospital Staff Card */}
+          {}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}

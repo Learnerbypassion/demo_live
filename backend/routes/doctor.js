@@ -1,7 +1,3 @@
-/**
- * Doctor Interface — Dashboard (queue), stats, patient medicine records,
- * and Doctor Review (MongoDB / Mongoose).
- */
 const express = require("express");
 const { IntakeSession, Patient, Document, Doctor, Hospital } = require("../db");
 const { requireAuth, requireRole } = require("../auth");
@@ -9,7 +5,6 @@ const { notifyPatient } = require("../callAgent");
 
 const router = express.Router();
 
-// ---------- Doctor Dashboard Stats ----------
 router.get("/stats", requireAuth, requireRole("doctor", "hospital_admin"), async (req, res) => {
   try {
     const today = new Date().toISOString().slice(0, 10);
@@ -65,7 +60,7 @@ router.get("/stats", requireAuth, requireRole("doctor", "hospital_admin"), async
 
       return res.json({ queue_count, red_flag_count, reviewed_today, total_patients });
     } else {
-      // Hospital Admin stats
+
       const patientIds = (await Patient.find({ hospital_id: hospId }).select("_id")).map(p => p._id);
 
       const queue_count = await IntakeSession.countDocuments({
@@ -94,7 +89,6 @@ router.get("/stats", requireAuth, requireRole("doctor", "hospital_admin"), async
   }
 });
 
-// ---------- Doctor Dashboard: queue of submitted patients ----------
 router.get("/queue", requireAuth, requireRole("doctor", "hospital_admin"), async (req, res) => {
   try {
     const isDoc = req.user.role === "doctor";
@@ -108,13 +102,11 @@ router.get("/queue", requireAuth, requireRole("doctor", "hospital_admin"), async
       const isObjectId = mongoose.Types.ObjectId.isValid(docIdStr);
       const docObjectId = isObjectId ? new mongoose.Types.ObjectId(docIdStr) : null;
 
-      // Find patients assigned to this doctor
       const patientConditions = [{ doctor_id: docIdStr }];
       if (docObjectId) patientConditions.push({ doctor_id: docObjectId });
       const myPatients = await Patient.find({ $or: patientConditions }).select("_id");
       const myPatientIds = myPatients.map(p => p._id);
 
-      // A doctor must ONLY see sessions assigned to them or their treatment patients
       const sessionOrConditions = [
         { doctor_id: docIdStr },
         { recommended_doctor_id: docIdStr }
@@ -136,7 +128,7 @@ router.get("/queue", requireAuth, requireRole("doctor", "hospital_admin"), async
         $or: sessionOrConditions
       };
     } else {
-      // Hospital Admin: show all submitted sessions for this hospital or unassigned
+
       const pList = await Patient.find({ hospital_id: hospId }).select("_id");
       const patientIds = pList.map(p => p._id.toString());
       query = {
@@ -179,7 +171,7 @@ router.get("/queue", requireAuth, requireRole("doctor", "hospital_admin"), async
         age: p.age,
         gender: p.gender,
         abha_id: p.abha_id,
-        // Pre-consultation vitals recorded at the vitals station
+
         vitals: s.vitals || null,
         vitals_status: s.vitals_status || "pending",
         intake: {
@@ -195,14 +187,12 @@ router.get("/queue", requireAuth, requireRole("doctor", "hospital_admin"), async
       };
     });
 
-
     res.json(results);
   } catch (err) {
     res.status(500).json({ error: err.message || "Failed to fetch queue" });
   }
 });
 
-// ---------- Patient's current medicine records ----------
 router.get("/patients/:patientId/medications", requireAuth, requireRole("doctor", "hospital_admin"), async (req, res) => {
   try {
     const patient = await Patient.findById(req.params.patientId);
@@ -236,16 +226,10 @@ router.get("/patients/:patientId/medications", requireAuth, requireRole("doctor"
   }
 });
 
-
-/**
- * Automatically evaluates a doctor's waiting queue and notifies the next patient in line.
- * Implements atomic claim to eliminate race conditions and regression reset for priority shifts.
- */
 async function checkAndNotifyNextInQueue(doctorId, hospitalId) {
   try {
     if (!doctorId) return;
 
-    // 1. Fetch hospital configuration (mode, threshold, template)
     let threshold = 1;
     let template = "This is an automated call from {hospital_name}. Your consultation with Dr. {doctor_name} is next. Please proceed to the waiting area.";
     let notifMode = "call";
@@ -261,7 +245,6 @@ async function checkAndNotifyNextInQueue(doctorId, hospitalId) {
       }
     }
 
-    // 2. Query waiting sessions assigned to this doctor, ordered by triage priority then arrival
     const waiting = await IntakeSession.find({
       status: "submitted",
       doctor_id: doctorId
@@ -269,15 +252,13 @@ async function checkAndNotifyNextInQueue(doctorId, hospitalId) {
 
     if (!waiting || waiting.length === 0) return;
 
-    // 3. Fetch doctor profile for name substitution
     const doc = await Doctor.findById(doctorId).catch(() => null);
     const doctorName = doc ? doc.name : "your doctor";
 
-    // 4. Check candidates within threshold (e.g. index 0 for threshold = 1)
     for (let i = 0; i < Math.min(threshold, waiting.length); i++) {
       const candidate = waiting[i];
       if (!candidate.queue_notified) {
-        // Atomic claim: only one process wins the right to notify
+
         const claimed = await IntakeSession.findOneAndUpdate(
           { _id: candidate._id, queue_notified: { $ne: true } },
           { $set: { queue_notified: true } },
@@ -304,9 +285,6 @@ async function checkAndNotifyNextInQueue(doctorId, hospitalId) {
       }
     }
 
-    // 5. Queue Regression Reset:
-    // If an emergency red-flag session was inserted ahead, a session previously notified might be bumped
-    // back beyond threshold. Reset queue_notified so they receive a fresh call when they reach threshold again.
     for (let j = threshold; j < waiting.length; j++) {
       if (waiting[j].queue_notified) {
         console.log(`[callAgent] Session ${waiting[j]._id} regressed to position #${j + 1}. Resetting queue_notified for next cycle.`);
@@ -318,7 +296,6 @@ async function checkAndNotifyNextInQueue(doctorId, hospitalId) {
   }
 }
 
-// ---------- Doctor Review: Profile | Reports | Diagnosis | Case | Prescribing ----------
 router.post("/sessions/:id/review", requireAuth, requireRole("doctor"), async (req, res) => {
   try {
     const s = await IntakeSession.findById(req.params.id);
@@ -328,7 +305,7 @@ router.post("/sessions/:id/review", requireAuth, requireRole("doctor"), async (r
     const docHosp = req.user.hospital_id ? req.user.hospital_id.toString() : null;
 
     if (patient && docHosp && patient.hospital_id && patient.hospital_id.toString() !== docHosp) {
-      // Auto-adopt session and patient to the reviewing doctor's hospital
+
       await Patient.findByIdAndUpdate(patient._id, { hospital_id: docHosp });
       await IntakeSession.findByIdAndUpdate(s._id, { hospital_id: docHosp });
     }
@@ -349,14 +326,12 @@ router.post("/sessions/:id/review", requireAuth, requireRole("doctor"), async (r
 
     await IntakeSession.findByIdAndUpdate(s.id, updates);
 
-    // Re-evaluate queue for this doctor asynchronously and notify next patient in line
     const reviewingDocId = req.user.id || req.user._id || s.doctor_id;
     const reviewingHospId = req.user.hospital_id || s.hospital_id;
     checkAndNotifyNextInQueue(reviewingDocId, reviewingHospId).catch(e => {
       console.warn("[callAgent] Queue notification trigger notice:", e.message);
     });
 
-    // Push to Central Mock ABHA Platform (Awaited with timeout for verified sync status!)
     let abhaSynced = false;
     let abhaRecordId = null;
     let abhaError = null;
@@ -368,7 +343,6 @@ router.post("/sessions/:id/review", requireAuth, requireRole("doctor"), async (r
 
       const { extractLabs } = require("../extract");
 
-      // Collect OCR documents and lab results for this session with comprehensive panel extraction
       const sessionDocs = await Document.find({ session_id: s.id });
       const summaryText = summary || s.summary || "";
       const parsedFromSummary = extractLabs(summaryText);
@@ -398,7 +372,6 @@ router.post("/sessions/:id/review", requireAuth, requireRole("doctor"), async (r
         });
       }
 
-      // Determine hospital name directly from doctor and hospital database
       const { Doctor, Hospital } = require("../db");
       let hospId = req.user.hospital_id || "default";
       let hospName = null;
@@ -488,7 +461,6 @@ router.post("/sessions/:id/review", requireAuth, requireRole("doctor"), async (r
   }
 });
 
-// ---------- Cross-Hospital Longitudinal ABHA Records ----------
 router.get("/patients/:patientId/abha-history", requireAuth, requireRole("doctor", "hospital_admin"), async (req, res) => {
   try {
     const patient = await Patient.findById(req.params.patientId);
@@ -510,7 +482,6 @@ router.get("/patients/:patientId/abha-history", requireAuth, requireRole("doctor
   }
 });
 
-// Direct lookup by raw ABHA ID
 router.get("/abha-records/:abhaId", requireAuth, requireRole("doctor", "hospital_admin"), async (req, res) => {
   try {
     const axios = require("axios");
@@ -522,8 +493,6 @@ router.get("/abha-records/:abhaId", requireAuth, requireRole("doctor", "hospital
   }
 });
 
-
-// ---------- Manual Patient Queue Notification / Nudge Override ----------
 router.post("/sessions/:id/notify", requireAuth, requireRole("doctor", "hospital_admin"), async (req, res) => {
   try {
     const session = await IntakeSession.findById(req.params.id);

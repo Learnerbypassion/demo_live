@@ -1,12 +1,8 @@
-/**
- * Hospital Notification & Administrative Settings Routes
- */
 const express = require("express");
 const router = express.Router({ mergeParams: true });
 const { Hospital } = require("../db");
 const { requireAuth, requireRole } = require("../auth");
 
-// Middleware: ensure admin belongs to this hospital
 function ensureHospitalAdmin(req, res, next) {
   const targetHospitalId = req.params.id;
   const userHospitalId = req.user.hospital_id || req.user.id;
@@ -16,9 +12,6 @@ function ensureHospitalAdmin(req, res, next) {
   next();
 }
 
-/**
- * GET /api/hospitals/:id/notifications
- */
 router.get("/:id/notifications", requireAuth, requireRole("hospital_admin"), ensureHospitalAdmin, async (req, res) => {
   try {
     const hosp = await Hospital.findById(req.params.id);
@@ -36,9 +29,6 @@ router.get("/:id/notifications", requireAuth, requireRole("hospital_admin"), ens
   }
 });
 
-/**
- * PATCH /api/hospitals/:id/notifications
- */
 router.patch("/:id/notifications", requireAuth, requireRole("hospital_admin"), ensureHospitalAdmin, async (req, res) => {
   try {
     const { notification_mode, notification_threshold, notification_message_template } = req.body;

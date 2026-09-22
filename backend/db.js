@@ -1,13 +1,9 @@
-/**
- * MediKiosk — MongoDB connection & Mongoose Schemas.
- */
 const mongoose = require("mongoose");
 const path = require("path");
 require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const MONGODB_URI = process.env.MONGO_URI || process.env.MONGODB_URI || "mongodb://localhost:27017/medikiosk";
 
-// Connect to MongoDB
 mongoose.connect(MONGODB_URI, {
   serverSelectionTimeoutMS: 5000,
 }).then(() => {
@@ -29,7 +25,6 @@ const schemaOptions = {
   },
 };
 
-// 1. Hospital Schema
 const HospitalSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
@@ -53,7 +48,6 @@ const HospitalSchema = new mongoose.Schema(
   schemaOptions
 );
 
-// 2. Doctor Schema
 const DoctorSchema = new mongoose.Schema(
   {
     hospital_id: { type: mongoose.Schema.Types.Mixed, required: true, ref: "Hospital" },
@@ -75,7 +69,6 @@ const DoctorSchema = new mongoose.Schema(
   schemaOptions
 );
 
-// 3. Receptionist Schema
 const ReceptionistSchema = new mongoose.Schema(
   {
     hospital_id: { type: mongoose.Schema.Types.Mixed, required: true, ref: "Hospital" },
@@ -88,7 +81,6 @@ const ReceptionistSchema = new mongoose.Schema(
   schemaOptions
 );
 
-// 4. Patient Schema
 const PatientSchema = new mongoose.Schema(
   {
     hospital_id: { type: mongoose.Schema.Types.Mixed, required: true, ref: "Hospital" },
@@ -108,7 +100,6 @@ const PatientSchema = new mongoose.Schema(
   schemaOptions
 );
 
-// 5. IntakeSession Schema
 const IntakeSessionSchema = new mongoose.Schema(
   {
     token: { type: String, unique: true },
@@ -128,7 +119,7 @@ const IntakeSessionSchema = new mongoose.Schema(
     diagnosis: { type: String },
     prescription: { type: String },
     summary: { type: String },
-    status: { type: String, default: "in_progress" }, // in_progress | submitted | reviewed
+    status: { type: String, default: "in_progress" },
     consent_given: { type: Boolean, default: true },
     submitted_at: { type: String },
     reviewed_at: { type: String },
@@ -138,31 +129,30 @@ const IntakeSessionSchema = new mongoose.Schema(
     hospital_id: { type: mongoose.Schema.Types.Mixed, ref: "Hospital" },
     kiosk_id: { type: String, default: "KIOSK-01" },
     queue_notified: { type: Boolean, default: false },
-    // QR-code phone handoff upload token (session-scoped, LAN-local)
+
     upload_token: { type: String, index: true },
     upload_token_expires_at: { type: Date },
-    upload_token_used: { type: Boolean, default: false }, // reserved for future single-use mode
-    // Pre-consultation vitals (recorded by receptionist at vitals station)
+    upload_token_used: { type: Boolean, default: false },
+
     vitals: {
-      temperature:  { type: Number, default: null }, // °F
-      bp_systolic:  { type: Number, default: null }, // mmHg
-      bp_diastolic: { type: Number, default: null }, // mmHg
-      pulse:        { type: Number, default: null }, // bpm
-      spo2:         { type: Number, default: null }, // %
-      weight:       { type: Number, default: null }, // kg
+      temperature:  { type: Number, default: null },
+      bp_systolic:  { type: Number, default: null },
+      bp_diastolic: { type: Number, default: null },
+      pulse:        { type: Number, default: null },
+      spo2:         { type: Number, default: null },
+      weight:       { type: Number, default: null },
       recorded_by:  { type: mongoose.Schema.Types.Mixed, ref: "Receptionist", default: null },
       recorded_at:  { type: Date, default: null },
     },
-    // "pending" → "in_progress" → "recorded"
+
     vitals_status:     { type: String, enum: ["pending", "in_progress", "recorded"], default: "pending" },
-    // Which receptionist currently holds the lock for taking vitals
+
     vitals_claimed_by: { type: mongoose.Schema.Types.Mixed, ref: "Receptionist", default: null },
     vitals_claimed_at: { type: Date, default: null },
   },
   schemaOptions
 );
 
-// 6. Document Schema
 const DocumentSchema = new mongoose.Schema(
   {
     session_id: { type: mongoose.Schema.Types.Mixed, required: true, ref: "IntakeSession" },
@@ -174,7 +164,6 @@ const DocumentSchema = new mongoose.Schema(
   schemaOptions
 );
 
-// Models
 const Hospital = mongoose.model("Hospital", HospitalSchema);
 const Doctor = mongoose.model("Doctor", DoctorSchema);
 const Receptionist = mongoose.model("Receptionist", ReceptionistSchema);
@@ -182,7 +171,6 @@ const Patient = mongoose.model("Patient", PatientSchema);
 const IntakeSession = mongoose.model("IntakeSession", IntakeSessionSchema);
 const Document = mongoose.model("Document", DocumentSchema);
 
-// 7. ClinicalQuestion Schema
 const ClinicalQuestionSchema = new mongoose.Schema(
   {
     hospital_id: { type: String, default: null, index: true },
@@ -199,7 +187,6 @@ const ClinicalQuestionSchema = new mongoose.Schema(
 
 const ClinicalQuestion = mongoose.model("ClinicalQuestion", ClinicalQuestionSchema);
 
-// 8. SymptomDecisionTree Schema (Hospital-authored question parameters)
 const SymptomDecisionTreeSchema = new mongoose.Schema(
   {
     hospital_id: { type: String, required: true, index: true },
@@ -231,8 +218,6 @@ async function initClinicalQuestions() {
   }
 }
 
-
-// Helper function to generate unique kiosk session token A-1, A-2...
 async function genToken() {
   const count = await IntakeSession.countDocuments();
   let nextNum = count + 14;

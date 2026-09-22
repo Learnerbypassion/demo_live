@@ -1,11 +1,5 @@
-/**
- * Pre-defined Clinical Questions for MediKiosk
- * Stored in MongoDB and rendered directly without latency for known complaints.
- * Custom symptoms or voice inputs engage the Clinical AI generator dynamically.
- */
-
 const SEED_QUESTIONS = [
-  // ===================== FEVER =====================
+
   {
     symptom_key: "fever",
     question_order: 1,
@@ -153,7 +147,6 @@ const SEED_QUESTIONS = [
     }
   },
 
-  // ===================== COUGH =====================
   {
     symptom_key: "cough",
     question_order: 1,
@@ -291,7 +284,6 @@ const SEED_QUESTIONS = [
     }
   },
 
-  // ===================== GENERAL =====================
   {
     symptom_key: "general",
     question_order: 1,

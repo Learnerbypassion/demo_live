@@ -1,8 +1,3 @@
-/**
- * Fast RFC 1321 compliant MD5 implementation for frontend static audio cache keying.
- * Matches Node.js crypto.createHash('md5').update(str).digest('hex') exactly.
- */
-
 function md5cycle(x, k) {
   let a = x[0], b = x[1], c = x[2], d = x[3];
   a = ff(a, b, c, d, k[0], 7, -680876936);

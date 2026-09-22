@@ -11,11 +11,10 @@ import {
 import { useGlobal } from '../context/GlobalContext';
 import { api, getStoredUser } from '../services/api';
 
-
 function hasMeaningfulSummary(summary) {
   if (!summary || typeof summary !== 'string') return false;
   const clean = summary
-    .replace(/\|[^\n]+\|/g, '') // remove markdown table lines
+    .replace(/\|[^\n]+\|/g, '')
     .replace(/no\s+(past\s+)?medical\s+history(\s+recorded)?\.?/gi, '')
     .replace(/no\s+(significant\s+)?findings(\s+recorded)?\.?/gi, '')
     .replace(/no\s+summary(\s+available)?\.?/gi, '')
@@ -37,12 +36,11 @@ export default function PatientDashboard() {
   const initialProfile = patients.find(p => p.id === myPatientId) || patients[0] || stored;
 
   const [patient, setPatient] = useState(initialProfile || null);
-  const [activeTab, setActiveTab] = useState('abha'); // 'abha', 'local', 'card', 'profile'
+  const [activeTab, setActiveTab] = useState('abha');
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ phone: '', address: '' });
   const [isSaving, setIsSaving] = useState(false);
 
-  // ABHA Records state
   const [abhaRecords, setAbhaRecords] = useState([]);
   const [loadingAbha, setLoadingAbha] = useState(false);
   const [abhaError, setAbhaError] = useState(null);
@@ -51,12 +49,11 @@ export default function PatientDashboard() {
   const [copiedAbha, setCopiedAbha] = useState(false);
   const [copiedFhir, setCopiedFhir] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterType, setFilterType] = useState('ALL'); // 'ALL', 'AYUSH', 'ALLOPATHIC', 'LABS'
+  const [filterType, setFilterType] = useState('ALL');
   const [expandedRecords, setExpandedRecords] = useState({});
   const [selectedFhirModal, setSelectedFhirModal] = useState(null);
   const [localSessions, setLocalSessions] = useState([]);
 
-  // Load detailed patient profile and local hospital OPD sessions
   useEffect(() => {
     if (myPatientId) {
       api.getPatient(myPatientId)
@@ -78,24 +75,22 @@ export default function PatientDashboard() {
     }
   }, [myPatientId]);
 
-  // Determine active ABHA ID (profile abha_id, or fallback demo ID)
   const activeAbhaId = patient?.abha_id || patient?.abhaId || stored?.abha_id || null;
 
-  // Fetch Central ABHA Records
   const fetchAbhaRecords = async (targetId) => {
     const idToFetch = targetId || activeAbhaId;
     if (!idToFetch) return;
     setLoadingAbha(true);
     setAbhaError(null);
     try {
-      // 1. Try direct from Central Mock ABHA Server (fastest, full longitudinal history)
+
       const res = await api.getAbhaRecordsDirect(idToFetch);
       if (res && Array.isArray(res.records)) {
         setAbhaRecords(res.records);
       } else if (Array.isArray(res)) {
         setAbhaRecords(res);
       } else if (myPatientId) {
-        // Fallback to backend patient route
+
         const bRes = await api.getPatientAbhaRecords(myPatientId);
         if (bRes && Array.isArray(bRes.records)) {
           setAbhaRecords(bRes.records);
@@ -209,7 +204,6 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
     navigate('/');
   };
 
-  // Filtered ABHA Records
   const filteredAbhaRecords = useMemo(() => {
     return abhaRecords.filter(r => {
       const q = searchQuery.toLowerCase();
@@ -229,14 +223,12 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
     });
   }, [abhaRecords, searchQuery, filterType]);
 
-  // Unique hospitals visited
   const uniqueHospitals = useMemo(() => {
     const set = new Set();
     abhaRecords.forEach(r => { if (r.hospital_name) set.add(r.hospital_name); });
     return set.size;
   }, [abhaRecords]);
 
-  // Compute clean latest diagnosis (guarantee real clinical text)
   const cleanLatestDiagnosis = useMemo(() => {
     for (const r of abhaRecords) {
       if (r.diagnosis && !/no\s+(past\s+)?medical\s+history/i.test(r.diagnosis)) {
@@ -249,7 +241,6 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
     return 'Acute Febrile Syndrome & Upper Respiratory Infection';
   }, [abhaRecords]);
 
-  // Compute all local hospital OPD consultations & registrations
   const hospitalVisits = useMemo(() => {
     if (localSessions && localSessions.length > 0) {
       return localSessions.map(s => ({
@@ -270,7 +261,6 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
       }));
     }
 
-    // Direct fallback from abhaRecords (all 3 records are from this hospital)
     return abhaRecords.map(r => ({
       id: r.session_id || r.record_id,
       record_id: r.record_id,
@@ -291,7 +281,7 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-      {/* Top Header */}
+      {}
       <header className="bg-gradient-to-r from-brand-900 via-brand-950 to-brand-900 text-white shadow-md shrink-0 border-b border-brand-800">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-18 flex items-center justify-between py-2 sm:py-3">
           <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
@@ -327,10 +317,10 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
         </div>
       </header>
 
-      {/* Main Container */}
+      {}
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 flex flex-col space-y-4 sm:space-y-6">
-        
-        {/* Hero Patient Profile & ABHA Identity Card */}
+
+        {}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="bg-gradient-to-r from-brand-900 via-indigo-900 to-brand-800 p-4 sm:p-6 text-white relative">
             <div className="absolute top-0 right-0 w-96 h-full bg-radial from-white/10 to-transparent pointer-events-none" />
@@ -364,7 +354,7 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
                 </div>
               </div>
 
-              {/* ABHA Badge & Quick Link */}
+              {}
               <div className="bg-black/30 backdrop-blur-md border border-white/15 p-3.5 sm:p-4 rounded-xl flex flex-col space-y-2 w-full md:w-auto md:min-w-[280px]">
                 <div className="flex items-center justify-between text-xs text-brand-200">
                   <span className="font-semibold uppercase tracking-wider text-[10px]">National ABHA ID</span>
@@ -391,7 +381,7 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
             </div>
           </div>
 
-          {/* Quick Metrics Bar */}
+          {}
           <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-gray-100 border-b border-gray-200 bg-gray-50/50">
             <div className="p-3 sm:p-5 text-center">
               <p className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Central Records</p>
@@ -422,7 +412,7 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
           </div>
         </div>
 
-        {/* Navigation Tabs */}
+        {}
         <div className="flex items-center space-x-1 sm:space-x-2 border-b border-gray-200 overflow-x-auto pb-0 px-1">
           <button
             onClick={() => setActiveTab('abha')}
@@ -479,10 +469,10 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
           </button>
         </div>
 
-        {/* ================= TAB 1: CENTRAL ABHA RECORDS ================= */}
+        {}
         {activeTab === 'abha' && (
           <div className="space-y-6">
-            {/* Control Bar: Search, Filters & Sync */}
+            {}
             <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="relative flex-1 max-w-md">
                 <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-3" />
@@ -535,7 +525,7 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
               </div>
             </div>
 
-            {/* Error / Notice message */}
+            {}
             {abhaError && (
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center text-amber-800 text-sm">
                 <AlertCircle className="w-5 h-5 mr-3 shrink-0 text-amber-600" />
@@ -543,7 +533,7 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
               </div>
             )}
 
-            {/* Records List */}
+            {}
             {loadingAbha ? (
               <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
                 <RefreshCw className="w-10 h-10 text-brand-600 animate-spin mx-auto mb-3" />
@@ -586,7 +576,7 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
                       animate={{ opacity: 1, y: 0 }}
                       className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
                     >
-                      {/* Record Card Header */}
+                      {}
                       <div className="p-5 sm:p-6 border-b border-gray-100">
                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
                           <div>
@@ -641,9 +631,9 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
                           </div>
                         </div>
 
-                        {/* Core Clinical Snapshot */}
+                        {}
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 bg-gray-50/70 p-4 rounded-xl border border-gray-100">
-                          {/* Chief Complaint & Diagnosis */}
+                          {}
                           <div className="md:col-span-5 space-y-2">
                             <div>
                               <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400 block mb-0.5">Chief Complaint</span>
@@ -659,7 +649,7 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
                             </div>
                           </div>
 
-                          {/* Prescription Box */}
+                          {}
                           <div className="md:col-span-7 bg-white p-3.5 rounded-xl border border-emerald-200 shadow-2xs">
                             <div className="flex items-center justify-between mb-1.5">
                               <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider flex items-center">
@@ -679,7 +669,7 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
                         </div>
                       </div>
 
-                      {/* Expandable Clinical Details (Labs, AI Summary, AYUSH) */}
+                      {}
                       <AnimatePresence>
                         {isExpanded && (
                           <motion.div
@@ -688,7 +678,7 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
                             exit={{ opacity: 0, height: 0 }}
                             className="bg-slate-50/60 p-5 sm:p-6 border-t border-gray-100 space-y-5"
                           >
-                            {/* Extracted Lab Reports Table */}
+                            {}
                             {hasLabs && (
                               <div className="bg-white rounded-xl border border-purple-200 p-4 shadow-sm">
                                 <div className="flex items-center justify-between mb-3">
@@ -751,7 +741,7 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
                               </div>
                             )}
 
-                            {/* AYUSH Findings */}
+                            {}
                             {hasAyush && rec.ayush_fields && (
                               <div className="bg-emerald-50/70 rounded-xl border border-emerald-200 p-4">
                                 <h4 className="text-xs font-bold text-emerald-900 uppercase tracking-wider mb-3 flex items-center">
@@ -768,7 +758,7 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
                               </div>
                             )}
 
-                            {/* AI Clinical Intake Summary - Only show if there is actual meaningful summary */}
+                            {}
                             {hasMeaningfulSummary(rec.ai_summary) && (
                               <div className="bg-white rounded-xl border border-blue-200 p-4 shadow-sm">
                                 <h4 className="text-xs font-bold text-blue-900 uppercase tracking-wider mb-2 flex items-center">
@@ -781,7 +771,7 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
                               </div>
                             )}
 
-                            {/* HPI Transcript */}
+                            {}
                             {rec.hpi_transcript && (
                               <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                                 <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 flex items-center">
@@ -794,7 +784,7 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
                               </div>
                             )}
 
-                            {/* FHIR Action */}
+                            {}
                             <div className="flex justify-end pt-2">
                               <button
                                 onClick={() => setSelectedFhirModal(rec)}
@@ -808,7 +798,7 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
                         )}
                       </AnimatePresence>
 
-                      {/* Card Footer Toggle Bar */}
+                      {}
                       <button
                         onClick={() => toggleExpand(rec.record_id || idx)}
                         className="w-full py-2.5 px-6 bg-gray-50 hover:bg-gray-100 text-gray-600 text-xs font-semibold flex items-center justify-center space-x-1.5 transition border-t border-gray-100"
@@ -824,7 +814,7 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
           </div>
         )}
 
-        {/* ================= TAB 2: LOCAL HOSPITAL VISITS ================= */}
+        {}
         {activeTab === 'local' && (
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -914,15 +904,15 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
           </div>
         )}
 
-        {/* ================= TAB 3: DIGITAL ABHA CARD ================= */}
+        {}
         {activeTab === 'card' && (
           <div className="max-w-2xl mx-auto w-full space-y-6">
-            {/* Authentic Visual ABHA Card Replica */}
+            {}
             <div className="bg-gradient-to-br from-orange-50 via-white to-green-50 rounded-3xl border-2 border-orange-200/80 shadow-xl overflow-hidden relative p-6 sm:p-8">
-              {/* Top Tricolor Strip */}
+              {}
               <div className="h-2 w-full bg-gradient-to-r from-orange-500 via-white to-emerald-600 absolute top-0 left-0" />
 
-              {/* Card Header */}
+              {}
               <div className="flex items-center justify-between pb-4 border-b border-orange-100">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 rounded-full bg-orange-500/10 border border-orange-300 flex items-center justify-center font-bold text-orange-600 text-xs">
@@ -940,15 +930,15 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
                 </div>
               </div>
 
-              {/* Card Body */}
+              {}
               <div className="py-6 flex flex-col sm:flex-row items-center gap-6">
-                {/* Patient Photo Avatar */}
+                {}
                 <div className="w-28 h-32 rounded-2xl bg-gradient-to-tr from-brand-700 to-indigo-800 p-1 shadow-md shrink-0 flex flex-col items-center justify-center text-white border-2 border-white">
                   <User className="w-16 h-16 text-white/90 mb-1" />
                   <span className="text-[10px] font-mono tracking-widest text-emerald-300">ABDM VERIFIED</span>
                 </div>
 
-                {/* Patient Details */}
+                {}
                 <div className="space-y-3 flex-1 text-center sm:text-left">
                   <div>
                     <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Name</span>
@@ -974,7 +964,7 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
                   </div>
                 </div>
 
-                {/* QR Code Graphic */}
+                {}
                 <div className="p-3 bg-white rounded-2xl border border-gray-200 shadow-sm text-center shrink-0">
                   <div className="w-24 h-24 bg-gray-900 rounded-lg p-2 flex flex-col items-center justify-center text-white relative">
                     <QrCode className="w-20 h-20 text-white" />
@@ -983,14 +973,14 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
                 </div>
               </div>
 
-              {/* Card Footer */}
+              {}
               <div className="pt-4 border-t border-orange-100/80 flex items-center justify-between text-[11px] text-gray-500">
                 <span>Ministry of Health &amp; Family Welfare, Govt. of India</span>
                 <span className="font-mono font-bold text-emerald-800">100% Tamper Proof</span>
               </div>
             </div>
 
-            {/* Print & Download Actions */}
+            {}
             <div className="flex justify-center space-x-4">
               <button
                 onClick={() => window.print()}
@@ -1010,10 +1000,10 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
           </div>
         )}
 
-        {/* ================= TAB 4: PRIVACY & SETTINGS ================= */}
+        {}
         {activeTab === 'profile' && (
           <div className="grid md:grid-cols-2 gap-6">
-            {/* Contact Details */}
+            {}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
               <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
                 <h3 className="font-bold text-gray-900 text-base">Personal Contact Information</h3>
@@ -1082,7 +1072,7 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
               )}
             </div>
 
-            {/* ABDM Consent Manager (DPDP Act 2023) */}
+            {}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                 <h3 className="font-bold text-gray-900 text-base">ABDM Consent Manager (DPDP 2023)</h3>
@@ -1124,7 +1114,7 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
 
       </main>
 
-      {/* ================= MODAL: LINK / CHANGE ABHA ID ================= */}
+      {}
       {showAbhaLinkModal && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-200">
@@ -1176,7 +1166,7 @@ Standard:        FHIR R4 / HL7 Clinical Document Architecture
         </div>
       )}
 
-      {/* ================= MODAL: FHIR R4 INSPECTION ================= */}
+      {}
       {selectedFhirModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-gray-200 flex flex-col max-h-[85vh]">

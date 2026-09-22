@@ -1,12 +1,3 @@
-/**
- * useSpeech — Multilingual ASR / TTS hook for MediKiosk
- *
- * Priority chain:
- *   1. Client In-Memory Cache (0ms instant playback for already generated audio)
- *   2. Server Persistent Cache (backend/audio_cache, <10ms instant response)
- *   3. Sarvam AI (https://api.sarvam.ai) / Bhashini — backend proxy at /api/bhasini
- *   4. Web Speech API fallback (browser built-in)
- */
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { md5 } from '../utils/md5';
 
@@ -72,8 +63,7 @@ const BHASINI_LANG_NAME = {
   'Gujarati': 'Gujarati',
 };
 
-// Client-side in-memory cache for 0ms instant playback across language switches
-const clientAudioCache = new Map(); // key -> blobUrl
+const clientAudioCache = new Map();
 
 async function checkBhasiniAvailable() {
   try {
@@ -104,7 +94,6 @@ export function useSpeech() {
     asr: typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window),
   };
 
-  // Check Bhasini / Sarvam availability once on mount
   useEffect(() => {
     checkBhasiniAvailable().then(info => {
       setBhasiniAvailable(info.available);
@@ -115,9 +104,8 @@ export function useSpeech() {
     });
   }, []);
 
-  // ---- Instant Stop --------------------------------------------------------
   const stopSpeaking = useCallback(() => {
-    // Invalidate sequence so in-flight fetch is dropped
+
     speechSequenceRef.current++;
     if (abortControllerRef.current) {
       try { abortControllerRef.current.abort(); } catch (_) {}
@@ -141,14 +129,12 @@ export function useSpeech() {
     setVoiceLoadingText('');
   }, [isSupported.tts]);
 
-  // ---- TTS ----------------------------------------------------------------
   const speakViaBhasini = useCallback(async (text, lang, currentSeq) => {
     const targetLang = SARVAM_LANG_CODE[lang] || 'hi-IN';
     const activeSpeaker = SARVAM_VOICE_BY_LANG[targetLang] || 'roopa';
     const cacheKey = `${lang}::${activeSpeaker}::${text.trim()}`;
     const hash = md5(cacheKey);
 
-    // 1. Instant Client In-Memory Playback (0ms delay!)
     if (clientAudioCache.has(cacheKey)) {
       const cachedUrl = clientAudioCache.get(cacheKey);
       if (audioRef.current) {
@@ -172,7 +158,6 @@ export function useSpeech() {
       return true;
     }
 
-    // 2. Static Asset Cache Check (/audio_cache/<hash>.json deployed with frontend)
     try {
       const baseUrl = import.meta.env.BASE_URL ? import.meta.env.BASE_URL.replace(/\/$/, '') : '';
       const staticUrl = `${baseUrl}/audio_cache/${hash}.json`;
@@ -210,12 +195,10 @@ export function useSpeech() {
       }
     } catch (_) {}
 
-    // 3. Audio Privacy Guard: Never send sensitive patient information to external TTS API
     if (isSensitiveClinicalContent(text)) {
-      return false; // Fallback to local Web Speech API
+      return false;
     }
 
-    // 4. Fetch dynamically from backend TTS API (Sarvam / Bhashini proxy)
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
@@ -246,14 +229,12 @@ export function useSpeech() {
         return false;
       }
 
-      // Decode base64 WAV into Blob URL
       const binary = atob(data.audioContent);
       const bytes  = new Uint8Array(binary.length);
       for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
       const blob = new Blob([bytes], { type: 'audio/wav' });
       const url  = URL.createObjectURL(blob);
 
-      // Save into client cache for instant re-use
       clientAudioCache.set(cacheKey, url);
 
       if (audioRef.current) {
@@ -317,22 +298,17 @@ export function useSpeech() {
   const speak = useCallback(async (text, lang = 'English') => {
     if (!text) return;
 
-    // Immediately stop any prior speech before starting new speech!
     stopSpeaking();
 
-    // Assign new sequence ID to track this specific speech request
     const seq = ++speechSequenceRef.current;
 
-    // 1. Try audio cache / Bhasini / Sarvam first
     const ok = await speakViaBhasini(text, lang, seq);
     if (ok) return;
     if (seq !== speechSequenceRef.current) return;
 
-    // 2. Fallback to browser Web Speech API
     speakViaWebSpeech(text, lang, seq);
   }, [speakViaBhasini, speakViaWebSpeech, stopSpeaking]);
 
-  // ---- ASR ----------------------------------------------------------------
   const startListening = useCallback((lang = 'English', onResult, onError) => {
     if (!isSupported.asr) {
       if (onError) onError(new Error('Speech recognition not supported in this browser'));

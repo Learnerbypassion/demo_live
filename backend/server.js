@@ -1,11 +1,3 @@
-/**
- * MediKiosk API -- Node.js / Express
- * Run: cd backend && npm run dev  (port 8000)
- *
- * Dev requires two extra processes:
- *   OCR sidecar: cd ocr-service && python main.py   (port 8001)
- *   Frontend:    cd frontend && npm run dev          (port 5173)
- */
 require("dotenv").config();
 const express = require("express");
 const cors    = require("cors");
@@ -33,7 +25,6 @@ fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 const app = express();
 
-// Deployment-aware CORS
 const configuredOrigins = (process.env.FRONTEND_URL || "")
   .split(",")
   .map(s => s.trim().replace(/\/+$/, ""))
@@ -50,18 +41,16 @@ const allowedOrigins = Array.from(new Set([...configuredOrigins, ...defaultOrigi
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow non-browser requests (mobile apps, Postman, curl, server-to-server)
+
     if (!origin) return callback(null, true);
 
     const cleanOrigin = origin.replace(/\/+$/, "").toLowerCase();
 
-    // Check exact matches or wildcard
     const isExplicitlyAllowed = allowedOrigins.some(allowed => {
       if (allowed === "*") return true;
       return allowed.toLowerCase() === cleanOrigin;
     });
 
-    // Also automatically permit *.netlify.app, *.onrender.com, *.vercel.app, and localhost
     const isTrustedHost =
       cleanOrigin.endsWith(".netlify.app") ||
       cleanOrigin.endsWith(".onrender.com") ||
@@ -92,9 +81,9 @@ app.use("/api/ayush",    ayushRoutes);
 app.use("/api/bhasini",   bhasiniRoutes);
 app.use("/api/hospitals", decisionTreeRoutes);
 app.use("/api/hospitals", hospitalSettingsRoutes);
-// QR-code phone handoff routes (kiosk-side token + phone-side upload)
+
 app.use("/api", mobileUploadRoutes);
-// Receptionist vitals station — shared hospital-wide queue
+
 app.use("/api/receptionist", receptionistRoutes);
 
 app.get("/api/health", (req, res) => {
@@ -112,5 +101,3 @@ app.listen(PORT, () => {
   printStartupWarning();
   printCallAgentStartupWarning();
 });
-
-// Reload trigger: 1788785277666

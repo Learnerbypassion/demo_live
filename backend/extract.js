@@ -1,11 +1,5 @@
-/**
- * MediKiosk — Comprehensive Clinical Laboratory & Medication Extractor
- * Supports structured markdown tables, multi-line OCR test reports,
- * and standard clinical reference ranges (KFT, LFT, CBC, Lipids, Diabetes, Thyroid, Electrolytes).
- */
-
 const LAB_REFERENCE_RANGES = {
-  // Kidney Function Tests (KFT / RFT) & Electrolytes
+
   serum_urea: { low: 19.0, high: 45.0, unit: "mg/dL", label: "Serum Urea", patterns: [/serum\s*urea\b/i, /\burea\b/i] },
   serum_creatinine: { low: 0.72, high: 1.18, unit: "mg/dL", label: "Serum Creatinine", patterns: [/serum\s*creatinine\b/i] },
   creatinine: { low: 0.6, high: 1.3, unit: "mg/dL", label: "Creatinine", patterns: [/\bcreatinine\b/i] },
@@ -18,12 +12,10 @@ const LAB_REFERENCE_RANGES = {
   serum_sodium: { low: 136.0, high: 146.0, unit: "mmol/L", label: "Serum Sodium", patterns: [/serum\s*sodium\b|\bsodium\b/i] },
   serum_uric_acid: { low: 3.5, high: 7.2, unit: "mg/dL", label: "Serum Uric Acid", patterns: [/serum\s*uric\s*acid\b|uric\s*acid\b/i] },
 
-  // Diabetes / Glycemic
   hba1c: { low: 4.0, high: 5.6, unit: "%", label: "HbA1c", patterns: [/\bhba1c\b|glycated\s*hemoglobin/i] },
   fasting_glucose: { low: 70.0, high: 100.0, unit: "mg/dL", label: "Fasting Glucose", patterns: [/fasting\s*(blood\s*)?glucose\b|fasting\s*blood\s*sugar\b|\bfbs\b/i] },
   glucose: { low: 70.0, high: 140.0, unit: "mg/dL", label: "Blood Glucose", patterns: [/\bglucose\b|blood\s*sugar\b|\brbs\b/i] },
 
-  // Complete Blood Count (CBC)
   hemoglobin: { low: 12.0, high: 16.0, unit: "g/dL", label: "Hemoglobin", patterns: [/\bhemoglobin\b|\bhgb?\b/i] },
   wbc: { low: 4000, high: 11000, unit: "/µL", label: "WBC Count", patterns: [/total\s*leucocyte\s*count\b|\bwbc\b|\btlc\b/i] },
   platelets: { low: 1.5, high: 4.5, unit: "lakh/µL", label: "Platelet Count", patterns: [/platelet\s*count\b|\bplatelets\b/i] },
@@ -31,7 +23,6 @@ const LAB_REFERENCE_RANGES = {
   pcv: { low: 36.0, high: 50.0, unit: "%", label: "PCV / Hematocrit", patterns: [/\bpcv\b|hematocrit/i] },
   esr: { low: 0, high: 20, unit: "mm/hr", label: "ESR", patterns: [/\besr\b|erythrocyte\s*sedimentation/i] },
 
-  // Liver Function Tests (LFT)
   bilirubin_total: { low: 0.2, high: 1.2, unit: "mg/dL", label: "Total Bilirubin", patterns: [/total\s*bilirubin\b|\bbilirubin\s*total\b/i] },
   bilirubin_direct: { low: 0.0, high: 0.3, unit: "mg/dL", label: "Direct Bilirubin", patterns: [/direct\s*bilirubin\b|conjugated\s*bilirubin\b/i] },
   sgot: { low: 5.0, high: 40.0, unit: "U/L", label: "SGOT (AST)", patterns: [/\bsgot\b|\bast\b|aspartate\s*aminotransferase/i] },
@@ -41,14 +32,12 @@ const LAB_REFERENCE_RANGES = {
   albumin: { low: 3.5, high: 5.0, unit: "g/dL", label: "Albumin", patterns: [/\balbumin\b/i] },
   globulin: { low: 2.0, high: 3.5, unit: "g/dL", label: "Globulin", patterns: [/\bglobulin\b/i] },
 
-  // Lipid Profile
   cholesterol: { low: 0.0, high: 200.0, unit: "mg/dL", label: "Total Cholesterol", patterns: [/total\s*cholesterol\b|\bcholesterol\b/i] },
   triglycerides: { low: 0.0, high: 150.0, unit: "mg/dL", label: "Triglycerides", patterns: [/\btriglycerides?\b/i] },
   hdl: { low: 40.0, high: 60.0, unit: "mg/dL", label: "HDL Cholesterol", patterns: [/\bhdl\b|hdl\s*cholesterol/i] },
   ldl: { low: 0.0, high: 100.0, unit: "mg/dL", label: "LDL Cholesterol", patterns: [/\bldl\b|ldl\s*cholesterol/i] },
   vldl: { low: 5.0, high: 30.0, unit: "mg/dL", label: "VLDL Cholesterol", patterns: [/\bvldl\b|vldl\s*cholesterol/i] },
 
-  // Thyroid
   tsh: { low: 0.4, high: 4.0, unit: "µIU/mL", label: "TSH", patterns: [/\btsh\b|thyroid\s*stimulating/i] },
   t3: { low: 80.0, high: 200.0, unit: "ng/dL", label: "Total T3", patterns: [/\bt3\b|triiodothyronine/i] },
   t4: { low: 5.0, high: 12.0, unit: "µg/dL", label: "Total T4", patterns: [/\bt4\b|thyroxine/i] },
@@ -100,9 +89,6 @@ function extractMedications(text) {
   return unique;
 }
 
-/**
- * Parses markdown table (from AI Summary or LLM triage)
- */
 function parseLabsFromMarkdownTable(text) {
   if (!text) return [];
   const labs = [];
@@ -152,9 +138,6 @@ function parseLabsFromMarkdownTable(text) {
   return labs;
 }
 
-/**
- * Parses multi-line clinical laboratory reports from raw OCR text
- */
 function extractLabsFromOcrText(text) {
   if (!text) return [];
   const labs = [];
@@ -171,33 +154,28 @@ function extractLabsFromOcrText(text) {
 
       const matchedPattern = ref.patterns.some(pat => pat.test(line));
       if (matchedPattern) {
-        // Look ahead in the next 1-6 lines for value, unit, reference range
+
         let value = null;
         let unit = ref.unit;
         let refRange = null;
         let abnormal = false;
 
-        // Check if value is on same line: e.g. "SERUM CREATININE 0.69 mg/dl"
         const inlineMatch = line.match(/([><=~]?\s*\d+(\.\d+)?)\s*(mg\/dl|mmol\/l|g\/dl|%|\/µl|ml\/min[^\s]*|u\/l)?/i);
         if (inlineMatch && !line.toLowerCase().startsWith(inlineMatch[1])) {
-          // ensure number isn't part of title
+
         }
 
-        // Search following 1-6 lines
         for (let j = i + 1; j <= Math.min(i + 6, lines.length - 1); j++) {
           const nextLine = lines[j];
 
-          // If next line hits another lab test name, stop looking ahead
           const isNextTest = Object.values(LAB_REFERENCE_RANGES).some(other =>
             other !== ref && other.patterns.some(p => p.test(nextLine))
           );
           if (isNextTest) break;
 
-          // Check for flag (L or H or High or Low)
           if (/^(L|Low|Below)$/i.test(nextLine)) abnormal = true;
           if (/^(H|High|Above|Elevated)$/i.test(nextLine)) abnormal = true;
 
-          // Check for numeric value
           if (value === null) {
             const numMatch = nextLine.match(/^([><=~]?\s*\d+(\.\d+)?)$/);
             if (numMatch) {
@@ -206,13 +184,11 @@ function extractLabsFromOcrText(text) {
             }
           }
 
-          // Check for unit
           if (/^(mg\/dl|mmol\/l|g\/dl|%|lakh\/µl|\/µl|u\/l|µiu\/ml|ng\/dl|µg\/dl|ml\/min\/1\.73m\*?2)$/i.test(nextLine)) {
             unit = nextLine;
             continue;
           }
 
-          // Check for reference range (e.g. 19-45, 0.72-1.18, > 90, 8.8 - 10.6)
           const rangeMatch = nextLine.match(/^([><=~]?\s*\d+(\.\d+)?\s*[-–]\s*\d+(\.\d+)?|[><=]\s*\d+(\.\d+)?)$/);
           if (rangeMatch) {
             refRange = rangeMatch[1];
@@ -238,16 +214,11 @@ function extractLabsFromOcrText(text) {
   return labs;
 }
 
-/**
- * Universal laboratory extractor (combines markdown table parsing + multi-line OCR parsing)
- */
 function extractLabs(text) {
   if (!text) return [];
 
-  // Strategy 1: If text contains a markdown table, parse it directly (highest precision)
   const mdLabs = parseLabsFromMarkdownTable(text);
 
-  // Strategy 2: Parse multi-line OCR text directly
   const ocrLabs = extractLabsFromOcrText(text);
 
   if (mdLabs.length >= ocrLabs.length && mdLabs.length > 0) {
@@ -255,7 +226,7 @@ function extractLabs(text) {
   }
 
   if (ocrLabs.length > 0) {
-    // Merge any additional fields from mdLabs if available
+
     const merged = [...ocrLabs];
     for (const m of mdLabs) {
       const exists = merged.some(l => l.name.trim().toLowerCase() === m.name.trim().toLowerCase());
