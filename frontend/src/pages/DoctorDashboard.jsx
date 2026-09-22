@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { PhoneCall, Bell, Stethoscope, LogOut, ClipboardList, CheckCircle, AlertTriangle, FileCode2, FileUp, Languages, Sparkles, RefreshCw, Clock, ShieldAlert, Microscope, Pill, Activity, Eye, FileText, Building2, History, Download, X, Copy, Check, FileCode, ChevronRight, ChevronDown, ChevronUp, ChevronLeft, Search } from 'lucide-react';
 import { useGlobal } from '../context/GlobalContext';
 import { api } from '../services/api';
+import RepoButton from '../components/RepoButton';
 
 
 function FormattedAiSummary({ text }) {
@@ -654,12 +655,13 @@ Status: Digitally Signed & Synced to Central ABDM Registry
           </div>
         </div>
 
-        {/* Right: badges + sign out */}
+        {/* Right: badges + repo link + sign out */}
         <div className="flex items-center gap-2 shrink-0">
           <div className="hidden sm:flex items-center gap-1.5 text-xs bg-white/10 border border-white/15 text-white/90 px-3 py-1.5 rounded-full">
             <Sparkles className="w-3.5 h-3.5 text-blue-200" />
             <span className="font-medium">Clinician-in-the-Loop</span>
           </div>
+          <RepoButton variant="dark" />
           <button onClick={handleSignOut}
             className="flex items-center gap-1 text-xs text-red-200 hover:text-white hover:bg-white/10 px-2.5 sm:px-3 py-1.5 rounded-full transition-colors">
             <LogOut className="w-3.5 h-3.5" />

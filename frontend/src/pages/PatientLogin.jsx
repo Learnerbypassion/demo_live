@@ -5,6 +5,7 @@ import { ArrowLeft, Shield, ArrowRight } from 'lucide-react';
 import { api } from '../services/api';
 import { useGlobal } from '../context/GlobalContext';
 import { DemoCredentialsSideBox } from '../components/JudgeCredentials';
+import RepoButton from '../components/RepoButton';
 
 export default function PatientLogin() {
   const navigate = useNavigate();
@@ -64,14 +65,20 @@ export default function PatientLogin() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center p-4 sm:p-6 relative">
       
-      {/* Back Button */}
-      <button 
-        onClick={() => navigate('/')}
-        className="self-start sm:absolute sm:top-8 sm:left-8 mb-4 sm:mb-0 flex items-center text-gray-500 hover:text-gray-900 transition-colors font-medium text-sm sm:text-base"
-      >
-        <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
-        Back to Portal
-      </button>
+      {/* Top Navigation Bar: Back Button & GitHub Repo Button */}
+      <div className="w-full flex items-center justify-between sm:block mb-4 sm:mb-0">
+        <button 
+          onClick={() => navigate('/')}
+          className="sm:absolute sm:top-8 sm:left-8 flex items-center text-gray-500 hover:text-gray-900 transition-colors font-medium text-sm sm:text-base"
+        >
+          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
+          Back to Portal
+        </button>
+
+        <div className="sm:absolute sm:top-8 sm:right-8">
+          <RepoButton />
+        </div>
+      </div>
 
       <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-10 w-full max-w-5xl mx-auto my-auto py-4 sm:py-0">
         <motion.div 

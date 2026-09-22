@@ -2,12 +2,17 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Building2, MonitorSmartphone, ArrowRight, UserCircle } from 'lucide-react';
+import RepoButton from '../components/RepoButton';
 
 export default function PortalSelection() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 sm:p-6">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 sm:p-6 relative">
+      {/* GitHub Repo Button */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20">
+        <RepoButton />
+      </div>
       <div className="max-w-6xl w-full py-4 sm:py-0">
         {/* Header Section */}
         <motion.div 
